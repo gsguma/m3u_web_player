@@ -10,6 +10,7 @@
     body { background-color: #363636; color: #fff; }
     .nav-tabs .nav-link { color: #fff; }
     .nav-tabs .nav-link.active { background-color: #b7b7b7; }
+    .nav-tabs > .nav-item { margin-right: 5px; }
     .card {
       background: #363636;
       transition: transform .2s;
@@ -33,7 +34,7 @@
     <div class="input-group mb-3">
       <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
       <button class="btn btn-primary" onclick="loadFromUrl(document.getElementById('urlInput').value)">
-        Carregar
+        Carregar lista
       </button>
     </div>
     <div id="status" class="small text-warning mb-3"></div>
@@ -61,8 +62,6 @@
         <div class="row mt-3">
           <div class="col-md-3">
             <h6>Categorias</h6>
-            <input type="text" id="catFilter-filmes" class="form-control form-control-sm mb-2"
-              placeholder="Filtrar categorias...">
             <div id="catList-filmes" class="list-group"></div>
           </div>
           <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
