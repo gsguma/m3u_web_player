@@ -52,9 +52,15 @@
     <div id="status" class="small text-warning mb-3"></div>
 
     <ul class="nav nav-tabs" id="tabs" role="tablist">
-      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button></li>
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button>
+      </li>
     </ul>
 
     <div class="tab-content">
@@ -63,7 +69,8 @@
           <div class="col-md-3">
             <h6>Categorias</h6>
             <!--
-            <input type="text" id="catFilter-tv" class="form-control form-control-sm mb-2" placeholder="Filtrar categorias...">
+            <input type="text" id="catFilter-tv" class="form-control form-control-sm mb-2" 
+                   placeholder="Filtrar categorias...">
             -->
             <div id="catList-tv" class="list-group"></div>
           </div>
@@ -76,7 +83,8 @@
         <div class="row mt-3">
           <div class="col-md-3">
             <h6>Categorias</h6>
-            <input type="text" id="catFilter-filmes" class="form-control form-control-sm mb-2" placeholder="Filtrar categorias...">
+            <input type="text" id="catFilter-filmes" class="form-control form-control-sm mb-2" 
+                   placeholder="Filtrar categorias...">
             <div id="catList-filmes" class="list-group"></div>
           </div>
           <div class="col-md-9">
@@ -88,7 +96,8 @@
         <div class="row mt-3">
           <div class="col-md-3">
             <h6>Categorias</h6>
-            <input type="text" id="catFilter-series" class="form-control form-control-sm mb-2" placeholder="Filtrar categorias...">
+            <input type="text" id="catFilter-series" class="form-control form-control-sm mb-2"
+                   placeholder="Filtrar categorias...">
             <div id="catList-series" class="list-group"></div>
           </div>
           <div class="col-md-9">
@@ -104,7 +113,9 @@
         <div class="modal-content bg-dark text-white">
           <div class="modal-header border-0">
             <span class="modal-title" id="mp4ModalLabel">Player</span>
-            <button type="button" class="btn-close btn-close-white btn btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white btn btn-sm" data-bs-dismiss="modal"
+                    aria-label="Close">
+            </button>
           </div>
           <div class="modal-body">
             <video id="mp4Player" class="w-100 rounded" controls style="background:#000;max-height:70vh;"></video>
@@ -231,7 +242,6 @@
       });
     }
 
-    // Setup listeners para modal mp4 apenas uma vez
     (function setupMp4ModalListeners() {
       const modalEl = document.getElementById('mp4Modal');
       const mp4Player = document.getElementById('mp4Player');
