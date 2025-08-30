@@ -11,13 +11,7 @@
     .nav-tabs .nav-link { color: #fff; }
     .nav-tabs .nav-link.active { background-color: #b7b7b7; }
     .nav-tabs > .nav-item { margin-right: 5px; }
-    .card {
-      background: #363636;
-      transition: transform .2s;
-      border: 1px solid #aeaeae !important;
-      padding: 2px;
-      color: #e8e8e8;
-    }
+    .card { background: #363636; transition: transform .2s; border: 1px solid #aeaeae !important; padding: 2px; color: #e8e8e8; }
     .card:hover { transform: scale(1.09); background: #414141; }
     .card-title { font-size: 0.8rem; }
     .card-img-top { object-fit: cover; }
@@ -30,315 +24,313 @@
   </style>
 </head>
 <body>
-  <div class="container-fluid py-3">
-    <div class="input-group mb-3">
-      <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
-      <button class="btn btn-primary" onclick="loadFromUrl(document.getElementById('urlInput').value)">
-        Carregar lista
-      </button>
-    </div>
-    <div id="status" class="small text-warning mb-3"></div>
+<div class="container-fluid py-3">
+  <div class="input-group mb-3">
+    <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
+    <button class="btn btn-primary" onclick="loadFromUrl(document.getElementById('urlInput').value)">
+      Carregar lista
+    </button>
+  </div>
+  <div id="status" class="small text-warning mb-3"></div>
 
-    <ul class="nav nav-tabs" id="tabs" role="tablist">
-      <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button>
-      </li>
-    </ul>
+  <ul class="nav nav-tabs" id="tabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button></li>
+  </ul>
 
-    <div class="tab-content">
-      <div class="tab-pane fade show active" id="tab-tv">
-        <div class="row mt-3">
-          <div class="col-md-3"><h6>Categorias</h6><div id="catList-tv" class="list-group"></div></div>
-          <div class="col-md-9"><div class="row g-3" id="items-tv"></div></div>
-        </div>
-      </div>
-      <div class="tab-pane fade" id="tab-filmes">
-        <div class="row mt-3">
-          <div class="col-md-3">
-            <h6>Categorias</h6>
-            <div id="catList-filmes" class="list-group"></div>
-          </div>
-          <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
-        </div>
-      </div>
-      <div class="tab-pane fade" id="tab-series">
-        <div class="row mt-3">
-          <div class="col-md-3"><h6>Categorias</h6><div id="catList-series" class="list-group"></div></div>
-          <div class="col-md-9"><div class="row g-3" id="items-series"></div></div>
-        </div>
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="tab-tv">
+      <div class="row mt-3">
+        <div class="col-md-3"><h6>Categorias</h6><div id="catList-tv" class="list-group"></div></div>
+        <div class="col-md-9"><div class="row g-3" id="items-tv"></div></div>
       </div>
     </div>
-
-    <!-- MP4 Modal -->
-    <div class="modal fade" id="mp4Modal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content bg-dark text-white">
-          <div class="modal-header border-0">
-            <span class="modal-title" id="mp4ModalLabel">Player</span>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <video id="mp4Player" class="w-100 rounded" controls style="background:#000;max-height:70vh;"></video>
-          </div>
-        </div>
+    <div class="tab-pane fade" id="tab-filmes">
+      <div class="row mt-3">
+        <div class="col-md-3"><h6>Categorias</h6><div id="catList-filmes" class="list-group"></div></div>
+        <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
       </div>
     </div>
+    <div class="tab-pane fade" id="tab-series">
+      <div class="row mt-3">
+        <div class="col-md-3"><h6>Categorias</h6><div id="catList-series" class="list-group"></div></div>
+        <div class="col-md-9"><div class="row g-3" id="items-series"></div></div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Modal Séries -->
-    <div class="modal fade" id="seriesModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-        <div class="modal-content bg-dark text-white">
-          <div class="modal-header border-0">
-            <h5 class="modal-title" id="seriesModalLabel">Série</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body"><div id="seriesSeasons"></div></div>
+  <!-- MP4 Modal -->
+  <div class="modal fade" id="mp4Modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-0">
+          <span class="modal-title" id="mp4ModalLabel">Player</span>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <video id="mp4Player" class="w-100 rounded" controls style="background:#000;max-height:70vh;"></video>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    let allItems = { tv: [], filmes: [], series: [] };
+  <!-- Modal Séries -->
+  <div class="modal fade" id="seriesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="seriesModalLabel">Série</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body"><div id="seriesSeasons"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    function getWatched() {
-      return JSON.parse(localStorage.getItem("watchedEpisodes") || "[]");
-    }
-    function saveWatched(list) {
-      localStorage.setItem("watchedEpisodes", JSON.stringify(list));
-    }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let allItems = { tv: [], filmes: [], series: [] };
 
-    function toggleWatchedIcon(url, btn) {
-      let watched = getWatched();
-      const icon = btn.querySelector("i");
-      if (watched.includes(url)) {
-        watched = watched.filter(u => u !== url);
-        icon.classList.replace("bi-eye-slash", "bi-eye");
-        btn.classList.replace("btn-success", "btn-outline-light");
-      } else {
-        watched.push(url);
-        icon.classList.replace("bi-eye", "bi-eye-slash");
-        btn.classList.replace("btn-outline-light", "btn-success");
-      }
-      saveWatched(watched);
-    }
+function getWatched() { return JSON.parse(localStorage.getItem("watchedEpisodes") || "[]"); }
+function saveWatched(list) { localStorage.setItem("watchedEpisodes", JSON.stringify(list)); }
 
-    async function loadFromUrl(url) {
-      document.getElementById('status').textContent = "Carregando...";
-      try {
-        let resp;
-        try { resp = await fetch(url); }
-        catch { resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url)); }
-        if (!resp.ok) throw new Error("HTTP " + resp.status);
-        const text = await resp.text();
-        parseM3U(text);
-        document.getElementById('status').classList.add('d-none');
-        localStorage.setItem('iptv_m3u_url', url);
-      } catch(e) {
-        console.error(e);
-        document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
-      }
-    }
+function toggleWatchedIcon(url, btn) {
+  let watched = getWatched();
+  const icon = btn.querySelector("i");
+  if (watched.includes(url)) {
+    watched = watched.filter(u => u!==url);
+    icon.classList.replace("bi-eye-slash","bi-eye");
+    btn.classList.replace("btn-success","btn-outline-light");
+  } else {
+    watched.push(url);
+    icon.classList.replace("bi-eye","bi-eye-slash");
+    btn.classList.replace("btn-outline-light","btn-success");
+  }
+  saveWatched(watched);
+}
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const lastUrl = localStorage.getItem('iptv_m3u_url');
-      if (lastUrl) {
-        document.getElementById('urlInput').value = lastUrl;
-        loadFromUrl(lastUrl);
+async function loadFromUrl(url) {
+  document.getElementById('status').textContent = "Carregando...";
+  try {
+    let resp;
+    try { resp = await fetch(url); }
+    catch { resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url)); }
+    if (!resp.ok) throw new Error("HTTP "+resp.status);
+    const text = await resp.text();
+    parseM3U(text);
+    document.getElementById('status').classList.add('d-none');
+    localStorage.setItem('iptv_m3u_url', url);
+  } catch(e) {
+    console.error(e);
+    document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
+  }
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  const lastUrl = localStorage.getItem('iptv_m3u_url');
+  if(lastUrl){
+    document.getElementById('urlInput').value = lastUrl;
+    loadFromUrl(lastUrl);
+  }
+});
+
+function parseM3U(text){
+  allItems = { tv: [], filmes: [], series: [] };
+  const lines = text.split(/\r?\n/);
+  let current = {};
+  for(const line of lines){
+    if(line.startsWith("#EXTINF")){
+      const name = line.split(",").pop().trim();
+      const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
+      const group = /group-title="(.*?)"/.exec(line);
+      current = { name, logo: tvgLogo? tvgLogo[1]:'', group: group? group[1]:"Outros" };
+    } else if(line && !line.startsWith("#")){
+      current.url = line.trim();
+      if(/series/i.test(current.url)) allItems.series.push(current);
+      else if(/movie/i.test(current.url)) allItems.filmes.push(current);
+      else if(/.ts/i.test(current.url)) allItems.tv.push(current);
+      current = {};
+    }
+  }
+  renderAll();
+}
+
+function renderAll(){
+  renderSection("tv", allItems.tv);
+  renderSection("filmes", allItems.filmes);
+  renderSection("series", allItems.series);
+}
+
+function renderSection(section, items) {
+  const catList = document.getElementById("catList-" + section);
+  const grid = document.getElementById("items-" + section);
+  if (catList) catList.innerHTML = "";
+  grid.innerHTML = "";
+
+  const catSet = new Set(items.map(i => i.group || "Outros"));
+  let firstCat = null;
+
+  // Separar categorias especiais
+  const topCats = [];
+  const bottomCats = [];
+  const normalCats = [];
+
+  catSet.forEach(cat => {
+    if (cat.includes("⭐") || cat.includes("★") || cat.includes("✰")) topCats.push(cat);
+    else if (cat.includes("❌")) bottomCats.push(cat);
+    else normalCats.push(cat);
+  });
+
+  normalCats.sort((a,b) => a.localeCompare(b));
+  topCats.sort((a,b) => a.localeCompare(b));
+  bottomCats.sort((a,b) => a.localeCompare(b));
+
+  const orderedCats = [...topCats, ...normalCats, ...bottomCats];
+
+  orderedCats.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "list-group-item list-group-item-action";
+    btn.textContent = cat;
+    btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
+    catList.appendChild(btn);
+    if (!firstCat) firstCat = cat;
+  });
+
+  if (firstCat) renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
+}
+
+function renderItems(section, list){
+  const grid = document.getElementById("items-"+section);
+  grid.innerHTML="";
+  if(section==="series"){
+    const seriesMap = {};
+    list.forEach(it=>{
+      const baseName = it.name.replace(/S\d+E\d+/i,'').trim();
+      if(!seriesMap[baseName]) seriesMap[baseName]=[];
+      seriesMap[baseName].push(it);
+    });
+    Object.keys(seriesMap).forEach(name=>{
+      const serieItems = seriesMap[name];
+      const col = document.createElement("div");
+      col.className="col-6 col-md-3 col-lg-2";
+      const logo = serieItems[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
+      col.innerHTML=`
+        <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+          <div class="ratio ratio-16x9">
+            <img src="${logo}" class="card-img-top" alt="${name}">
+          </div>
+          <div class="card-body p-1 text-center">
+            <h6 class="card-title mb-0 text-truncate">${name}</h6>
+          </div>
+        </div>`;
+      col.querySelector(".card").addEventListener("click",()=>openSeriesModal(name,serieItems));
+      grid.appendChild(col);
+    });
+  } else {
+    list.forEach(it=>{
+      const col = document.createElement("div");
+      col.className="col-6 col-md-3 col-lg-2";
+      col.innerHTML=`
+        <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+          <div class="ratio ratio-16x9">
+            <img src="${it.logo||'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${it.name}">
+          </div>
+          <div class="card-body p-1 text-center">
+            <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
+          </div>
+        </div>`;
+      col.querySelector(".card").addEventListener("click",()=>playItem(it));
+      grid.appendChild(col);
+    });
+  }
+}
+
+function openSeriesModal(serieName, serieItems){
+  const modalTitle=document.getElementById("seriesModalLabel");
+  const container=document.getElementById("seriesSeasons");
+  container.innerHTML="";
+  modalTitle.textContent=serieName;
+
+  const seasonsMap={};
+  serieItems.forEach(it=>{
+    const match = it.name.match(/S(\d+)E(\d+)/i);
+    const seasonNum = match?parseInt(match[1]):1;
+    if(!seasonsMap[seasonNum]) seasonsMap[seasonNum]=[];
+    seasonsMap[seasonNum].push(it);
+  });
+
+  Object.keys(seasonsMap).sort((a,b)=>a-b).forEach(season=>{
+    const episodes = seasonsMap[season];
+    const seasonDiv = document.createElement("div");
+    seasonDiv.className="mb-3 border-bottom pb-2";
+    const allWatched = episodes.every(ep=>getWatched().includes(ep.url));
+
+    const header = document.createElement("h6");
+    header.style.cursor="pointer";
+    header.className="mb-2";
+    header.innerHTML=`Temporada ${season} <i class="bi ${allWatched?'bi-chevron-down':'bi-chevron-up'}"></i>`;
+    seasonDiv.appendChild(header);
+
+    const epList = document.createElement("div");
+    epList.style.display=allWatched?"none":"block";
+
+    episodes.forEach(ep=>{
+      const epDiv = document.createElement("div");
+      epDiv.className="d-flex justify-content-between align-items-center mb-1";
+      const watched = getWatched().includes(ep.url);
+      epDiv.innerHTML=`
+        <span>${ep.name}</span>
+        <div>
+          <button class="btn btn-sm btn-outline-light me-1" onclick="window.location.href='vlc:${ep.url}'">▶️</button>
+          <button class="btn btn-sm ${watched?'btn-success':'btn-outline-light'}" onclick="toggleWatchedIcon('${ep.url}',this)">
+            <i class="bi ${watched?'bi-eye-slash':'bi-eye'}"></i>
+          </button>
+        </div>`;
+      epList.appendChild(epDiv);
+    });
+
+    header.addEventListener("click",()=>{
+      if(epList.style.display==="none"){
+        epList.style.display="block";
+        header.querySelector("i").classList.replace("bi-chevron-down","bi-chevron-up");
+      }else{
+        epList.style.display="none";
+        header.querySelector("i").classList.replace("bi-chevron-up","bi-chevron-down");
       }
     });
 
-    function parseM3U(text) {
-      allItems = { tv: [], filmes: [], series: [] };
-      const lines = text.split(/\r?\n/);
-      let current = {};
-      for (const line of lines) {
-        if (line.startsWith("#EXTINF")) {
-          const name = line.split(",").pop().trim();
-          const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
-          const group = /group-title="(.*?)"/.exec(line);
-          current = { name, logo: tvgLogo ? tvgLogo[1] : "", group: group ? group[1] : "Outros" };
-        } else if (line && !line.startsWith("#")) {
-          current.url = line.trim();
-          if (/series/i.test(current.url)) allItems.series.push(current);
-          else if (/movie/i.test(current.url)) allItems.filmes.push(current);
-          else if (/.ts/i.test(current.url)) allItems.tv.push(current);
-          current = {};
-        }
-      }
-      renderAll();
-    }
+    seasonDiv.appendChild(epList);
+    container.appendChild(seasonDiv);
+  });
 
-    function renderAll() {
-      renderSection("tv", allItems.tv);
-      renderSection("filmes", allItems.filmes);
-      renderSection("series", allItems.series);
-    }
+  new bootstrap.Modal(document.getElementById("seriesModal")).show();
+}
 
-    function renderSection(section, items) {
-      const catList = document.getElementById("catList-" + section);
-      const grid = document.getElementById("items-" + section);
-      if (catList) catList.innerHTML = "";
-      grid.innerHTML = "";
-      const catSet = new Set(items.map(i => i.group || "Outros"));
-      let firstCat = null;
-      catSet.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.className = "list-group-item list-group-item-action";
-        btn.textContent = cat;
-        btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
-        catList.appendChild(btn);
-        if (!firstCat) firstCat = cat;
-      });
-      if (firstCat) renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
-    }
+(function setupMp4ModalListeners(){
+  const modalEl=document.getElementById('mp4Modal');
+  const mp4Player=document.getElementById('mp4Player');
+  if(!modalEl||!mp4Player) return;
+  modalEl.addEventListener('shown.bs.modal',()=>{mp4Player.play().catch(()=>{});});
+  modalEl.addEventListener('hidden.bs.modal',()=>{
+    mp4Player.pause(); mp4Player.currentTime=0; mp4Player.removeAttribute('src'); mp4Player.load();
+  });
+})();
 
-    function renderItems(section, list) {
-      const grid = document.getElementById("items-" + section);
-      grid.innerHTML = "";
-
-      if (section === "series") {
-        const seriesMap = {};
-        list.forEach(it => {
-          const baseName = it.name.replace(/S\d+E\d+/i, '').trim();
-          if (!seriesMap[baseName]) seriesMap[baseName] = [];
-          seriesMap[baseName].push(it);
-        });
-
-        Object.keys(seriesMap).forEach(name => {
-          const serieItems = seriesMap[name];
-          const col = document.createElement("div");
-          col.className = "col-6 col-md-3 col-lg-2";
-          const logo = serieItems[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
-          col.innerHTML = `
-            <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
-              <div class="ratio ratio-16x9">
-                <img src="${logo}" class="card-img-top" alt="${name}">
-              </div>
-              <div class="card-body p-1 text-center">
-                <h6 class="card-title mb-0 text-truncate">${name}</h6>
-              </div>
-            </div>
-          `;
-          col.querySelector(".card").addEventListener("click", () => openSeriesModal(name, serieItems));
-          grid.appendChild(col);
-        });
-      } else {
-        list.forEach(it => {
-          const col = document.createElement("div");
-          col.className = "col-6 col-md-3 col-lg-2";
-          col.innerHTML = `
-            <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
-              <div class="ratio ratio-16x9">
-                <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top"
-                  alt="${it.name}">
-              </div>
-              <div class="card-body p-1 text-center">
-                <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
-              </div>
-            </div>
-          `;
-          col.querySelector(".card").addEventListener("click", () => playItem(it));
-          grid.appendChild(col);
-        });
-      }
-    }
-
-    function openSeriesModal(serieName, serieItems) {
-      const modalTitle = document.getElementById("seriesModalLabel");
-      const container = document.getElementById("seriesSeasons");
-      container.innerHTML = "";
-      modalTitle.textContent = serieName;
-
-      const seasonsMap = {};
-      serieItems.forEach(it => {
-        const match = it.name.match(/S(\d+)E(\d+)/i);
-        const seasonNum = match ? parseInt(match[1]) : 1;
-        if (!seasonsMap[seasonNum]) seasonsMap[seasonNum] = [];
-        seasonsMap[seasonNum].push(it);
-      });
-
-      Object.keys(seasonsMap).sort((a,b)=>a-b).forEach(season => {
-        const episodes = seasonsMap[season];
-        const seasonDiv = document.createElement("div");
-        seasonDiv.className = "mb-3 border-bottom pb-2";
-
-        const allWatched = episodes.every(ep => getWatched().includes(ep.url));
-
-        const header = document.createElement("h6");
-        header.style.cursor = "pointer";
-        header.className = "mb-2";
-        header.innerHTML = `Temporada ${season} <i class="bi ${allWatched ? 'bi-chevron-down' : 'bi-chevron-up'}"></i>`;
-        seasonDiv.appendChild(header);
-
-        const epList = document.createElement("div");
-        epList.style.display = allWatched ? "none" : "block";
-
-        episodes.forEach(ep => {
-          const epDiv = document.createElement("div");
-          epDiv.className = "d-flex justify-content-between align-items-center mb-1";
-          const watched = getWatched().includes(ep.url);
-          epDiv.innerHTML = `
-            <span>${ep.name}</span>
-            <div>
-              <button class="btn btn-sm btn-outline-light me-1" onclick="window.location.href='vlc:${ep.url}'">
-                ▶️ Assistir
-              </button>
-              <button class="btn btn-sm ${watched ? 'btn-success' : 'btn-outline-light'}" onclick="toggleWatchedIcon('${ep.url}', this)">
-                <i class="bi ${watched ? 'bi-eye-slash' : 'bi-eye'}"></i>
-              </button>
-            </div>
-          `;
-          epList.appendChild(epDiv);
-        });
-
-        header.addEventListener("click", () => {
-          if (epList.style.display === "none") {
-            epList.style.display = "block";
-            header.querySelector("i").classList.replace("bi-chevron-down","bi-chevron-up");
-          } else {
-            epList.style.display = "none";
-            header.querySelector("i").classList.replace("bi-chevron-up","bi-chevron-down");
-          }
-        });
-
-        seasonDiv.appendChild(epList);
-        container.appendChild(seasonDiv);
-      });
-
-      new bootstrap.Modal(document.getElementById("seriesModal")).show();
-    }
-
-    (function setupMp4ModalListeners() {
-      const modalEl = document.getElementById('mp4Modal');
-      const mp4Player = document.getElementById('mp4Player');
-      if (!modalEl || !mp4Player) return;
-      modalEl.addEventListener('shown.bs.modal', function() { mp4Player.play().catch(()=>{}); });
-      modalEl.addEventListener('hidden.bs.modal', function() {
-        mp4Player.pause(); mp4Player.currentTime = 0; mp4Player.removeAttribute('src'); mp4Player.load();
-      });
-    })();
-
-    function playItem(item) {
-      const url = item.url, title = item.name;
-      if (url.match(/\.mp4(\?.*)?$/i)) {
-        const mp4Player = document.getElementById('mp4Player');
-        mp4Player.src = url; mp4Player.load();
-        document.getElementById('mp4ModalLabel').textContent = title;
-        new bootstrap.Modal(document.getElementById('mp4Modal')).show();
-      } else if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
-        window.location.href = 'vlc:' + url;
-      } else {
-        alert('Formato de vídeo não suportado.');
-      }
-    }
-  </script>
+function playItem(item){
+  const url=item.url, title=item.name;
+  if(url.match(/\.mp4(\?.*)?$/i)){
+    const mp4Player=document.getElementById('mp4Player');
+    mp4Player.src=url; mp4Player.load();
+    document.getElementById('mp4ModalLabel').textContent=title;
+    new bootstrap.Modal(document.getElementById('mp4Modal')).show();
+  }else if(url.match(/\.ts(\?.*)?$/i)||url.match(/\.mp4(\?.*)?$/i)){
+    window.location.href='vlc:'+url;
+  }else{
+    alert('Formato de vídeo não suportado.');
+  }
+}
+</script>
 </body>
 </html>
