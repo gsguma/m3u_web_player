@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\vlc]
+@="URL:VLC Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\vlc\shell]
+
+[HKEY_CLASSES_ROOT\vlc\shell\open]
+
+[HKEY_CLASSES_ROOT\vlc\shell\open\command]
+@="\"C:\\Program Files\\VideoLAN\\VLC\\vlc-protocol.bat\" \"%1\""
