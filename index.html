@@ -5,6 +5,7 @@
   <title>M3U Web Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"> <!-- ícones -->
   <style type="text/css">
     body { background-color: #363636; color: #fff; }
     .nav-tabs .nav-link { color: #fff; }
@@ -18,30 +19,13 @@
     }
     .card:hover { transform: scale(1.09); background: #414141; }
     .card-title { font-size: 0.8rem; }
-    .card-img-top {
-      object-fit: contain;
-    }
-    .list-group-item {
-      color: #cdcdcd;
-      background-color: #535353;
-    }
-    #items-tv, #items-series, #items-filmes {
-      margin-top: 10px !important;
-    }
-    #items-filmes .card .ratio, #items-series .card .ratio {
-      height: 220px !important;
-    }
-    .modal-header {
-      padding-bottom: 10px;
-      padding-top: 10px;
-    }
-    .modal-body {
-      padding-top: 0;
-      margin-top: 0;
-    }
-    #mp4Modal, #seriesModal {
-      background: #000000d9;
-    }
+    .card-img-top { object-fit: cover; }
+    .list-group-item { color: #cdcdcd; background-color: #535353; }
+    #items-tv, #items-series, #items-filmes { margin-top: 10px !important; }
+    #items-filmes .card .ratio, #items-series .card .ratio { height: 32vh !important; }
+    .modal-header { padding-bottom: 10px; padding-top: 10px; }
+    .modal-body { padding-top: 0; margin-top: 0; }
+    #mp4Modal, #seriesModal { background: #000000d9; }
   </style>
 </head>
 <body>
@@ -69,45 +53,35 @@
     <div class="tab-content">
       <div class="tab-pane fade show active" id="tab-tv">
         <div class="row mt-3">
-          <div class="col-md-3">
-            <h6>Categorias</h6>
-            <div id="catList-tv" class="list-group"></div>
-          </div>
-          <div class="col-md-9">
-            <div class="row g-3" id="items-tv"></div>
-          </div>
+          <div class="col-md-3"><h6>Categorias</h6><div id="catList-tv" class="list-group"></div></div>
+          <div class="col-md-9"><div class="row g-3" id="items-tv"></div></div>
         </div>
       </div>
       <div class="tab-pane fade" id="tab-filmes">
         <div class="row mt-3">
           <div class="col-md-3">
             <h6>Categorias</h6>
-            <input type="text" id="catFilter-filmes" class="form-control form-control-sm mb-2" 
-                   placeholder="Filtrar categorias...">
+            <input type="text" id="catFilter-filmes" class="form-control form-control-sm mb-2" placeholder="Filtrar categorias...">
             <div id="catList-filmes" class="list-group"></div>
           </div>
-          <div class="col-md-9">
-            <div class="row g-3" id="items-filmes"></div>
-          </div>
+          <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
         </div>
       </div>
       <div class="tab-pane fade" id="tab-series">
         <div class="row mt-3">
-          <div class="col-md-12">
-            <div class="row g-3" id="items-series"></div>
-          </div>
+          <div class="col-md-3"><h6>Categorias</h6><div id="catList-series" class="list-group"></div></div>
+          <div class="col-md-9"><div class="row g-3" id="items-series"></div></div>
         </div>
       </div>
     </div>
 
     <!-- MP4 modal -->
-    <div class="modal fade" id="mp4Modal" tabindex="-1" aria-labelledby="mp4ModalLabel" aria-hidden="true">
+    <div class="modal fade" id="mp4Modal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content bg-dark text-white">
           <div class="modal-header border-0">
             <span class="modal-title" id="mp4ModalLabel">Player</span>
-            <button type="button" class="btn-close btn-close-white btn btn-sm" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <video id="mp4Player" class="w-100 rounded" controls style="background:#000;max-height:70vh;"></video>
@@ -117,16 +91,14 @@
     </div>
 
     <!-- Modal para séries -->
-    <div class="modal fade" id="seriesModal" tabindex="-1" aria-labelledby="seriesModalLabel" aria-hidden="true">
+    <div class="modal fade" id="seriesModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content bg-dark text-white">
           <div class="modal-header border-0">
             <h5 class="modal-title" id="seriesModalLabel">Série</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
-          <div class="modal-body">
-            <div id="seriesSeasons"></div>
-          </div>
+          <div class="modal-body"><div id="seriesSeasons"></div></div>
         </div>
       </div>
     </div>
@@ -134,32 +106,45 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    let allItems = { tv: [], filmes: [], series: {} };
+    let allItems = { tv: [], filmes: [], series: [] };
+
+    // salvar/recuperar episódios vistos
+    function getWatched() {
+      return JSON.parse(localStorage.getItem("watchedEpisodes") || "[]");
+    }
+    function saveWatched(list) {
+      localStorage.setItem("watchedEpisodes", JSON.stringify(list));
+    }
+    function toggleWatched(url, btn) {
+      let watched = getWatched();
+      if (watched.includes(url)) {
+        watched = watched.filter(u => u !== url);
+        btn.innerHTML = '<i class="bi bi-eye"></i>';
+        btn.classList.remove("btn-success");
+        btn.classList.add("btn-outline-light");
+      } else {
+        watched.push(url);
+        btn.innerHTML = '<i class="bi bi-eye-fill"></i>';
+        btn.classList.remove("btn-outline-light");
+        btn.classList.add("btn-success");
+      }
+      saveWatched(watched);
+    }
 
     async function loadFromUrl(url) {
       document.getElementById('status').textContent = "Carregando...";
-      document.getElementById('status').classList.remove('d-none');
       try {
         let resp;
-        try {
-          resp = await fetch(url);
-        } catch {
-          console.warn("Falha no fetch direto, tentando via proxy...");
-          resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url));
-        }
-        
+        try { resp = await fetch(url); }
+        catch { resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url)); }
         if (!resp.ok) throw new Error("HTTP " + resp.status);
-        
         const text = await resp.text();
         parseM3U(text);
-        
-        document.getElementById('status').textContent = "Playlist carregada!";
         document.getElementById('status').classList.add('d-none');
-
         localStorage.setItem('iptv_m3u_url', url);
       } catch(e) {
         console.error(e);
-        document.getElementById('status').innerHTML = "⚠️ Erro ao carregar. Tente abrir um arquivo .m3u localmente.";
+        document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
       }
     }
     window.addEventListener('DOMContentLoaded', () => {
@@ -171,7 +156,7 @@
     });
 
     function parseM3U(text) {
-      allItems = { tv: [], filmes: [], series: {} };
+      allItems = { tv: [], filmes: [], series: [] };
       const lines = text.split(/\r?\n/);
       let current = {};
       for (const line of lines) {
@@ -179,37 +164,11 @@
           const name = line.split(",").pop().trim();
           const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
           const group = /group-title="(.*?)"/.exec(line);
-          current = { name, logo: tvgLogo ? tvgLogo[1] : "", group: group ? group[1] : "" };
+          current = { name, logo: tvgLogo ? tvgLogo[1] : "", group: group ? group[1] : "Outros" };
         } else if (line && !line.startsWith("#")) {
           current.url = line.trim();
-
           if (/series/i.test(current.url)) {
-            let match = /(.*?)[\s._-]*S(\d{1,2})E(\d{1,2})/i.exec(current.name);
-            if (match) {
-              let serieName = match[1].trim();
-              let temporada = "Temporada " + parseInt(match[2]);
-              let episodio = "Episódio " + parseInt(match[3]);
-
-              if (!allItems.series[serieName]) {
-                allItems.series[serieName] = { _logo: current.logo || "" };
-              }
-              if (!allItems.series[serieName][temporada]) {
-                allItems.series[serieName][temporada] = [];
-              }
-
-              allItems.series[serieName][temporada].push({
-                name: episodio,
-                url: current.url,
-                logo: current.logo
-              });
-
-              if (!allItems.series[serieName]._logo && current.logo) {
-                allItems.series[serieName]._logo = current.logo;
-              }
-            } else {
-              if (!allItems.series["Outros"]) allItems.series["Outros"] = { _logo:"", "Sem Temporada": [] };
-              allItems.series["Outros"]["Sem Temporada"].push(current);
-            }
+            allItems.series.push(current);
           } else if (/movie/i.test(current.url)) {
             allItems.filmes.push(current);
           } else if (/.ts/i.test(current.url)) {
@@ -232,41 +191,17 @@
       const grid = document.getElementById("items-" + section);
       if (catList) catList.innerHTML = "";
       grid.innerHTML = "";
-
-      if (section === "series") {
-        Object.keys(items).forEach(serieName => {
-          if (serieName === "_logo") return;
-
-          const logo = items[serieName]._logo || "https://via.placeholder.com/300x169?text=Serie";
-          const col = document.createElement("div");
-          col.className = "col-6 col-md-3 col-lg-2";
-          col.innerHTML = `
-            <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
-              <div class="ratio ratio-16x9">
-                <img src="${logo}" class="card-img-top" alt="${serieName}">
-              </div>
-              <div class="card-body p-1 text-center">
-                <h6 class="card-title mb-0 text-truncate">${serieName}</h6>
-              </div>
-            </div>`;
-          col.querySelector(".card").addEventListener("click", () => openSeriesModal(serieName));
-          grid.appendChild(col);
-        });
-      } else {
-        const catSet = new Set(items.map(i => i.group || "Outros"));
-        let firstCat = null;
-        catSet.forEach(cat => {
-          const btn = document.createElement("button");
-          btn.className = "list-group-item list-group-item-action";
-          btn.textContent = cat;
-          btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
-          catList.appendChild(btn);
-          if (!firstCat) firstCat = cat;
-        });
-        if (firstCat) {
-          renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
-        }
-      }
+      const catSet = new Set(items.map(i => i.group || "Outros"));
+      let firstCat = null;
+      catSet.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "list-group-item list-group-item-action";
+        btn.textContent = cat;
+        btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
+        catList.appendChild(btn);
+        if (!firstCat) firstCat = cat;
+      });
+      if (firstCat) renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
     }
 
     function renderItems(section, list) {
@@ -278,50 +213,37 @@
         col.innerHTML = `
           <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
             <div class="ratio ratio-16x9">
-              <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}"
-                   class="card-img-top" style="object-fit:cover;" alt="${it.name}">
+              <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" style="object-fit:cover;" alt="${it.name}">
             </div>
             <div class="card-body p-1 text-center">
               <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
             </div>
           </div>`;
-        col.querySelector(".card").addEventListener("click", () => playItem(it));
+        if (section === "series") {
+          col.querySelector(".card").addEventListener("click", () => openSeriesModal(it.name, it.url, it.logo));
+        } else {
+          col.querySelector(".card").addEventListener("click", () => playItem(it));
+        }
         grid.appendChild(col);
       });
     }
 
-    function openSeriesModal(serieName) {
+    function openSeriesModal(serieName, url, logo) {
       const modalTitle = document.getElementById("seriesModalLabel");
       const container = document.getElementById("seriesSeasons");
       container.innerHTML = "";
       modalTitle.textContent = serieName;
 
-      const serie = allItems.series[serieName];
-      if (serie._logo) {
-        container.innerHTML = `
-          <div class="mb-3 text-center">
-            <img src="${serie._logo}" alt="${serieName}" class="img-fluid rounded" style="max-height:200px; object-fit:contain;">
-          </div>`;
-      }
-
-      Object.keys(serie).forEach(temp => {
-        if (temp === "_logo") return;
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = `<h6 class="mt-3">${temp}</h6>`;
-        const list = document.createElement("ul");
-        list.className = "list-group list-group-flush";
-        serie[temp].forEach(ep => {
-          const li = document.createElement("li");
-          li.className = "list-group-item bg-dark text-white d-flex justify-content-between";
-          li.innerHTML = `<span>${ep.name}</span><button class="btn btn-sm btn-outline-light">▶️</button>`;
-          li.querySelector("button").addEventListener("click", () => {
-            window.location.href = 'vlc:' + ep.url;
-          });
-          list.appendChild(li);
-        });
-        tempDiv.appendChild(list);
-        container.appendChild(tempDiv);
-      });
+      // aqui pode evoluir: parsear temporadas/episódios se necessário
+      container.innerHTML = `
+        <div class="text-center">
+          <img src="${logo || 'https://via.placeholder.com/300x169?text=Serie'}" class="img-fluid rounded mb-3" style="max-height:200px;object-fit:contain;">
+          <p class="mb-0">${serieName}</p>
+        </div>
+        <div class="text-center mt-3">
+          <button class="btn btn-sm btn-outline-light" onclick="window.location.href='vlc:${url}'">▶️ Reproduzir</button>
+        </div>
+      `;
 
       new bootstrap.Modal(document.getElementById("seriesModal")).show();
     }
@@ -330,36 +252,23 @@
       const modalEl = document.getElementById('mp4Modal');
       const mp4Player = document.getElementById('mp4Player');
       if (!modalEl || !mp4Player) return;
-
-      modalEl.addEventListener('shown.bs.modal', function() {
-        mp4Player.play().catch(()=>{});
-      });
-
+      modalEl.addEventListener('shown.bs.modal', function() { mp4Player.play().catch(()=>{}); });
       modalEl.addEventListener('hidden.bs.modal', function() {
-        mp4Player.pause();
-        mp4Player.currentTime = 0;
-        mp4Player.removeAttribute('src');
-        mp4Player.load();
+        mp4Player.pause(); mp4Player.currentTime = 0; mp4Player.removeAttribute('src'); mp4Player.load();
       });
     })();
 
     function playItem(item) {
-      const url = item.url;
-      const title = item.name;
-
+      const url = item.url, title = item.name;
       if (url.match(/\.mp4(\?.*)?$/i)) {
         const mp4Player = document.getElementById('mp4Player');
-        mp4Player.src = url;
-        mp4Player.load();
-        const modalTitle = document.getElementById('mp4ModalLabel');
-        const modalEl = document.getElementById('mp4Modal');
-        const modal = new bootstrap.Modal(modalEl);
-        modalTitle.textContent = title;
-        modal.show();
+        mp4Player.src = url; mp4Player.load();
+        document.getElementById('mp4ModalLabel').textContent = title;
+        new bootstrap.Modal(document.getElementById('mp4Modal')).show();
       } else if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
         window.location.href = 'vlc:' + url;
       } else {
-        alert('Formato de vídeo não suportado para reprodução direta.');
+        alert('Formato de vídeo não suportado.');
       }
     }
   </script>
