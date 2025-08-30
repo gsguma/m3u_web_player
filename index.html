@@ -28,6 +28,17 @@
     #items-filmes .card .ratio {
       height: 250px !important;
     }
+    .modal-header {
+      padding-bottom: 10px;
+      padding-top: 10px;
+    }
+    .modal-body {
+      padding-top: 0;
+      margin-top: 0;
+    }
+    #mp4Modal {
+      background: #000000d9;
+    }
   </style>
 </head>
 <body>
@@ -92,8 +103,8 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content bg-dark text-white">
           <div class="modal-header border-0">
-            <h5 class="modal-title" id="mp4ModalLabel">Reprodução de Vídeo</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <span class="modal-title" id="mp4ModalLabel">Player</span>
+            <button type="button" class="btn-close btn-close-white btn btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <video id="mp4Player" class="w-100 rounded" controls style="background:#000;max-height:70vh;"></video>
@@ -240,12 +251,16 @@
 
     function playItem(item) {
       const url = item.url;
+      const title = item.name;
+
       if (url.match(/\.mp4(\?.*)?$/i)) {
         const mp4Player = document.getElementById('mp4Player');
         mp4Player.src = url;
         mp4Player.load();
+        const modalTitle = document.getElementById('mp4ModalLabel');
         const modalEl = document.getElementById('mp4Modal');
         const modal = new bootstrap.Modal(modalEl);
+        modalTitle.textContent = title;
         modal.show();
       } else if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
         window.location.href = 'vlc:' + url;
