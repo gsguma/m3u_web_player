@@ -18,6 +18,9 @@
     }
     .card:hover { transform: scale(1.09); background: #414141; }
     .card-title { font-size: 0.8rem; }
+    .card-img-top {
+      object-fit: contain;
+    }
     .list-group-item {
       color: #cdcdcd;
       background-color: #535353;
@@ -25,8 +28,8 @@
     #items-tv, #items-series, #items-filmes {
       margin-top: 10px !important;
     }
-    #items-filmes .card .ratio {
-      height: 250px !important;
+    #items-filmes .card .ratio, #items-series .card .ratio {
+      height: 220px !important;
     }
     .modal-header {
       padding-bottom: 10px;
@@ -36,7 +39,7 @@
       padding-top: 0;
       margin-top: 0;
     }
-    #mp4Modal {
+    #mp4Modal, #seriesModal {
       background: #000000d9;
     }
   </style>
@@ -68,10 +71,6 @@
         <div class="row mt-3">
           <div class="col-md-3">
             <h6>Categorias</h6>
-            <!--
-            <input type="text" id="catFilter-tv" class="form-control form-control-sm mb-2" 
-                   placeholder="Filtrar categorias...">
-            -->
             <div id="catList-tv" class="list-group"></div>
           </div>
           <div class="col-md-9">
@@ -94,13 +93,7 @@
       </div>
       <div class="tab-pane fade" id="tab-series">
         <div class="row mt-3">
-          <div class="col-md-3">
-            <h6>Categorias</h6>
-            <input type="text" id="catFilter-series" class="form-control form-control-sm mb-2"
-                   placeholder="Filtrar categorias...">
-            <div id="catList-series" class="list-group"></div>
-          </div>
-          <div class="col-md-9">
+          <div class="col-md-12">
             <div class="row g-3" id="items-series"></div>
           </div>
         </div>
@@ -114,11 +107,25 @@
           <div class="modal-header border-0">
             <span class="modal-title" id="mp4ModalLabel">Player</span>
             <button type="button" class="btn-close btn-close-white btn btn-sm" data-bs-dismiss="modal"
-                    aria-label="Close">
-            </button>
+                    aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <video id="mp4Player" class="w-100 rounded" controls style="background:#000;max-height:70vh;"></video>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para séries -->
+    <div class="modal fade" id="seriesModal" tabindex="-1" aria-labelledby="seriesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="seriesModalLabel">Série</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="seriesSeasons"></div>
           </div>
         </div>
       </div>
@@ -127,7 +134,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    let allItems = { tv: [], filmes: [], series: [] };
+    let allItems = { tv: [], filmes: [], series: {} };
 
     async function loadFromUrl(url) {
       document.getElementById('status').textContent = "Carregando...";
@@ -164,7 +171,7 @@
     });
 
     function parseM3U(text) {
-      allItems = { tv: [], filmes: [], series: [] };
+      allItems = { tv: [], filmes: [], series: {} };
       const lines = text.split(/\r?\n/);
       let current = {};
       for (const line of lines) {
@@ -176,14 +183,38 @@
         } else if (line && !line.startsWith("#")) {
           current.url = line.trim();
 
-          if (/movie/i.test(current.url) || /movie/i.test(current.url)) {
+          if (/series/i.test(current.url)) {
+            let match = /(.*?)[\s._-]*S(\d{1,2})E(\d{1,2})/i.exec(current.name);
+            if (match) {
+              let serieName = match[1].trim();
+              let temporada = "Temporada " + parseInt(match[2]);
+              let episodio = "Episódio " + parseInt(match[3]);
+
+              if (!allItems.series[serieName]) {
+                allItems.series[serieName] = { _logo: current.logo || "" };
+              }
+              if (!allItems.series[serieName][temporada]) {
+                allItems.series[serieName][temporada] = [];
+              }
+
+              allItems.series[serieName][temporada].push({
+                name: episodio,
+                url: current.url,
+                logo: current.logo
+              });
+
+              if (!allItems.series[serieName]._logo && current.logo) {
+                allItems.series[serieName]._logo = current.logo;
+              }
+            } else {
+              if (!allItems.series["Outros"]) allItems.series["Outros"] = { _logo:"", "Sem Temporada": [] };
+              allItems.series["Outros"]["Sem Temporada"].push(current);
+            }
+          } else if (/movie/i.test(current.url)) {
             allItems.filmes.push(current);
-          } else if (/series/i.test(current.url)) {
-            allItems.series.push(current);
           } else if (/.ts/i.test(current.url)) {
             allItems.tv.push(current);
           }
-          
           current = {};
         }
       }
@@ -197,25 +228,44 @@
     }
 
     function renderSection(section, items) {
-      const catSet = new Set(items.map(i => i.group || "Outros"));
       const catList = document.getElementById("catList-" + section);
-      catList.innerHTML = "";
-      
-      let firstCat = null;
-      
-      catSet.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.className = "list-group-item list-group-item-action";
-        btn.textContent = cat;
-        btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
-        catList.appendChild(btn);
-        if (!firstCat) firstCat = cat;
-      });
+      const grid = document.getElementById("items-" + section);
+      if (catList) catList.innerHTML = "";
+      grid.innerHTML = "";
 
-      if (firstCat) {
-        renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
+      if (section === "series") {
+        Object.keys(items).forEach(serieName => {
+          if (serieName === "_logo") return;
+
+          const logo = items[serieName]._logo || "https://via.placeholder.com/300x169?text=Serie";
+          const col = document.createElement("div");
+          col.className = "col-6 col-md-3 col-lg-2";
+          col.innerHTML = `
+            <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+              <div class="ratio ratio-16x9">
+                <img src="${logo}" class="card-img-top" alt="${serieName}">
+              </div>
+              <div class="card-body p-1 text-center">
+                <h6 class="card-title mb-0 text-truncate">${serieName}</h6>
+              </div>
+            </div>`;
+          col.querySelector(".card").addEventListener("click", () => openSeriesModal(serieName));
+          grid.appendChild(col);
+        });
       } else {
-        renderItems(section, items);
+        const catSet = new Set(items.map(i => i.group || "Outros"));
+        let firstCat = null;
+        catSet.forEach(cat => {
+          const btn = document.createElement("button");
+          btn.className = "list-group-item list-group-item-action";
+          btn.textContent = cat;
+          btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
+          catList.appendChild(btn);
+          if (!firstCat) firstCat = cat;
+        });
+        if (firstCat) {
+          renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
+        }
       }
     }
 
@@ -225,7 +275,6 @@
       list.forEach(it => {
         const col = document.createElement("div");
         col.className = "col-6 col-md-3 col-lg-2";
-
         col.innerHTML = `
           <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
             <div class="ratio ratio-16x9">
@@ -235,11 +284,46 @@
             <div class="card-body p-1 text-center">
               <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
             </div>
-          </div>
-        `;
+          </div>`;
         col.querySelector(".card").addEventListener("click", () => playItem(it));
         grid.appendChild(col);
       });
+    }
+
+    function openSeriesModal(serieName) {
+      const modalTitle = document.getElementById("seriesModalLabel");
+      const container = document.getElementById("seriesSeasons");
+      container.innerHTML = "";
+      modalTitle.textContent = serieName;
+
+      const serie = allItems.series[serieName];
+      if (serie._logo) {
+        container.innerHTML = `
+          <div class="mb-3 text-center">
+            <img src="${serie._logo}" alt="${serieName}" class="img-fluid rounded" style="max-height:200px; object-fit:contain;">
+          </div>`;
+      }
+
+      Object.keys(serie).forEach(temp => {
+        if (temp === "_logo") return;
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = `<h6 class="mt-3">${temp}</h6>`;
+        const list = document.createElement("ul");
+        list.className = "list-group list-group-flush";
+        serie[temp].forEach(ep => {
+          const li = document.createElement("li");
+          li.className = "list-group-item bg-dark text-white d-flex justify-content-between";
+          li.innerHTML = `<span>${ep.name}</span><button class="btn btn-sm btn-outline-light">▶️</button>`;
+          li.querySelector("button").addEventListener("click", () => {
+            window.location.href = 'vlc:' + ep.url;
+          });
+          list.appendChild(li);
+        });
+        tempDiv.appendChild(list);
+        container.appendChild(tempDiv);
+      });
+
+      new bootstrap.Modal(document.getElementById("seriesModal")).show();
     }
 
     (function setupMp4ModalListeners() {
