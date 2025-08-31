@@ -331,7 +331,7 @@
     function playItem(item) {
       let url = item.url      
       if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
-        url = url.replace(/^https?:\/\/[^/]+/, 'http://bmtop.online:80').replace(/\.ts$/, '.m3u8');
+        url = url.replace(/^https?:\/\/[^/]+/, 'https://bmtop.online').replace(/\.ts$/, '.m3u8');
       }
       
       const title = item.name;
