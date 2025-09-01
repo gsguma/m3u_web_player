@@ -199,9 +199,27 @@
       const grid = document.getElementById("items-" + section);
       if (catList) catList.innerHTML = "";
       grid.innerHTML = "";
-      const catSet = new Set(items.map(i => i.group || "Outros"));
+
+      let catArray = Array.from(new Set(items.map(i => i.group || "Outros")));
+
+      // ordena ⭐ no topo, ❌ no final, resto alfabético
+      catArray.sort((a, b) => {
+        const aHasStar = a.includes("⭐");
+        const bHasStar = b.includes("⭐");
+        const aHasX = a.includes("❌");
+        const bHasX = b.includes("❌");
+
+        if (aHasStar && !bHasStar) return -1;
+        if (!aHasStar && bHasStar) return 1;
+
+        if (aHasX && !bHasX) return 1;
+        if (!aHasX && bHasX) return -1;
+
+        return a.localeCompare(b, 'pt-BR');
+      });
+
       let firstCat = null;
-      catSet.forEach(cat => {
+      catArray.forEach(cat => {
         const btn = document.createElement("button");
         btn.className = "list-group-item list-group-item-action";
         btn.textContent = cat;
@@ -323,7 +341,6 @@
 
           epList.appendChild(epDiv);
         });
-
 
         header.addEventListener("click", () => {
           if (epList.style.display === "none") {
