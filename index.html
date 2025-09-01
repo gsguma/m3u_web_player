@@ -31,14 +31,21 @@
     /* search positioning */
     .cat-with-search { display:flex; align-items:center; gap:0.5rem; }
     .cat-with-search h6 { font-size:0.85rem; margin:0; white-space:nowrap; font-weight:600; }
-    .search-input { background:#2d2d2d; color:#fff; border:1px solid #6c6c6c; }
+    .btn-search {
+      background: #414141 !important;
+      color: #d4d0d0;
+      cursor: pointer;
+    }
+    .btn-clear {
+      color: #c6c6c6;
+    }
 
     /* input-with-clear wrapper */
-    .search-wrapper{position:relative; width:100%; max-width:180px}
-    .search-wrapper .btn-clear-inside{position:absolute; right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#ddd; padding:0 6px; font-size:0.85rem; cursor:pointer}
+    .search-wrapper { position:relative; width:100%; }
+    .search-wrapper .btn-clear-inside { position:absolute; right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#888; padding:0 6px; font-size:0.85rem; cursor:pointer }
     .search-wrapper .btn-clear-inside:hover{color:#fff}
-    .search-wrapper .btn-search-inside{position:absolute; right:4px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#ddd; padding:4px; cursor:pointer}
-    .search-wrapper input{padding-right:56px}
+    .search-wrapper .btn-search-inside { position:absolute; right:4px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#888; padding:4px; cursor:pointer }
+    .search-wrapper input { padding-right:56px }
 
     @media (max-width:768px){ .search-wrapper{max-width:120px} }
 
@@ -51,7 +58,7 @@
 </head>
 <body>
 <div class="container-fluid py-3">
-  <div class="input-group mb-3">
+  <div id="load-list-panel" class="input-group mb-3">
     <label for="urlInput" class="visually-hidden">M3U URL</label>
     <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
     <button id="load-list" class="btn btn-primary" onclick="loadFromUrl(document.getElementById('urlInput').value)">
@@ -62,13 +69,16 @@
 
   <ul class="nav nav-tabs" id="tabs" role="tablist">
     <li class="nav-item">
-      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button>
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv"><i class="bi bi-tv"></i> Canais de TV</button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button>
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes"><i class="bi bi-film"></i> Filmes</button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button>
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series"><i class="bi bi-collection-play"></i> Séries</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="show_settings()"><i class="bi bi-gear"></i></button>
     </li>
   </ul>
 
@@ -79,9 +89,9 @@
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
             <div class="input-group input-group-sm search-wrapper">
-              <input id="search-tv" class="form-control form-control-sm search-input" type="text" placeholder="Pesquisar" aria-label="Pesquisar canais">
-              <button id="clear-tv" class="btn-clear-inside" type="button" aria-label="Limpar">&times;</button>
-              <button id="search-btn-tv" class="btn-search-inside" type="button" aria-label="Buscar"><i class="bi bi-search"></i></button>
+              <input id="search-tv" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar canais">
+              <span id="clear-tv" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
+              <span id="search-btn-tv" class="btn-search input-group-text"><i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar</span>
             </div>
           </div>
           <div id="catList-tv" class="list-group"></div>
@@ -95,10 +105,10 @@
         <div class="col-md-3">
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
-            <div class="input-group input-group-sm search-wrapper">
-              <input id="search-filmes" class="form-control form-control-sm search-input" type="text" placeholder="Pesquisar" aria-label="Pesquisar filmes">
-              <button id="clear-filmes" class="btn-clear-inside" type="button" aria-label="Limpar">&times;</button>
-              <button id="search-btn-filmes" class="btn-search-inside" type="button" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            <div class="input-group input-group-sm search-wrapper">            
+              <input id="search-filmes" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar filmes">
+              <span id="clear-filmes" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
+              <span id="search-btn-filmes" class="btn-search input-group-text"><i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar</span>
             </div>
           </div>
           <div id="catList-filmes" class="list-group"></div>
@@ -112,10 +122,10 @@
         <div class="col-md-3">
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
-            <div class="input-group input-group-sm search-wrapper">
-              <input id="search-series" class="form-control form-control-sm search-input" type="text" placeholder="Pesquisar" aria-label="Pesquisar séries">
-              <button id="clear-series" class="btn-clear-inside" type="button" aria-label="Limpar">&times;</button>
-              <button id="search-btn-series" class="btn-search-inside" type="button" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            <div class="input-group input-group-sm search-wrapper">             
+              <input id="search-series" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar series">
+              <span id="clear-series" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
+              <span id="search-btn-series" class="btn-search input-group-text"><i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar</span>
             </div>
           </div>
           <div id="catList-series" class="list-group"></div>
@@ -160,21 +170,20 @@
 <script>
   let allItems = { tv: [], filmes: [], series: [] };
 
-  // --- Added helpers for channel grouping ---
-  function getBaseChannelName(name){
-    if(!name) return '';
+  function getBaseChannelName(name) {
+    if (!name) return '';
     let base = name.trim();
     base = base.replace(/\s*\[ALT\]$/i,'').trim();
-    // strip trailing quality tokens repeatedly
+
     const quality = /(\s+(FHD|FULL ?HD|UHD|4K|HD|SD|1080P|720P))$/i;
     while(quality.test(base)) base = base.replace(quality,'').trim();
     return base;
   }
-  function getVariantExtra(baseName, fullName){
-    if(!fullName) return '';
+  function getVariantExtra(baseName, fullName) {
+    if (!fullName) return '';
     const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&');
     let rest = fullName.replace(new RegExp('^'+safeBase,'i'),'').trim();
-    if(!rest) rest = 'Principal';
+    if (!rest) rest = 'Principal';
     return rest;
   }
 
@@ -199,31 +208,50 @@
     }
     saveWatched(watched);
   }
+  
+  function show_settings() {
+    const loadListPanel = document.getElementById('load-list-panel');
+    const btnLoadList = document.getElementById('load-list');
+    
+    if (loadListPanel.classList.contains('d-none')) {
+      loadListPanel.classList.remove('d-none');
+    } else {
+      loadListPanel.classList.add('d-none');
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    }
+    
+    btnLoadList.focus();
+  }
 
   async function loadFromUrl(url) {
-    const status = document.getElementById('status')
+    const loadListPanel = document.getElementById('load-list-panel');
     const urlInput = document.getElementById('urlInput');
     const btnLoadList = document.getElementById('load-list');
+    const status = document.getElementById('status')
 
     urlInput.disabled = true;
     btnLoadList.disabled = true;
-    btnLoadList.textContent = "Carregando...";
+    btnLoadList.textContent = 'Carregando...';
+    status.textContent = ''
 
     try {
       let resp;
       try { resp = await fetch(url); }
-      catch { resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url)); }
+      catch { resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url)); }
       if (!resp.ok) throw new Error("HTTP " + resp.status);
       const text = await resp.text();
       parseM3U(text);
       localStorage.setItem('iptv_m3u_url', url);
+      loadListPanel.classList.add('d-none');
+      status.classList.add('d-none');
     } catch(e) {
       console.error(e);
-      document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
+      status.innerHTML = '⚠️ Erro ao carregar playlist.';
+      status.classList.remove('d-none');
     } finally {
       urlInput.disabled = false;
       btnLoadList.disabled = false;
-      btnLoadList.textContent = "Atualizar Lista";
+      btnLoadList.textContent = 'Atualizar Lista';
     }
   }
 
@@ -238,19 +266,25 @@
 
   function parseM3U(text) {
     allItems = { tv: [], filmes: [], series: [] };
+    
+    let current = {};    
     const lines = text.split(/\r?\n/);
-    let current = {};
     for (const line of lines) {
-      if (line.startsWith("#EXTINF")) {
-        const name = line.split(",").pop().trim();
+      if (line.startsWith('#EXTINF')) {
+        const name = line.split(',').pop().trim();
         const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
         const group = /group-title="(.*?)"/.exec(line);
-        current = { name, logo: tvgLogo ? tvgLogo[1] : "", group: group ? group[1] : "Outros" };
+        current = { name, logo: tvgLogo ? tvgLogo[1] : '', group: group ? group[1] : 'Outros' };
       } else if (line && !line.startsWith("#")) {
         current.url = line.trim();
-        if (/series/i.test(current.url)) allItems.series.push(current);
-        else if (/movie/i.test(current.url)) allItems.filmes.push(current);
-        else if (/.ts/i.test(current.url) || /.m3u8/i.test(current.url)) { current.baseName = getBaseChannelName(current.name); allItems.tv.push(current); }
+        if (/series/i.test(current.url)) {
+          allItems.series.push(current);
+        } else if (/movie/i.test(current.url)) {
+          allItems.filmes.push(current);
+        } else if (/.ts/i.test(current.url) || /.m3u8/i.test(current.url)) {
+          current.baseName = getBaseChannelName(current.name); allItems.tv.push(current);
+        }
+
         current = {};
       }
     }
@@ -258,25 +292,26 @@
   }
 
   function renderAll() {
-    renderSection("tv", allItems.tv);
-    renderSection("filmes", allItems.filmes);
-    renderSection("series", allItems.series);
+    renderSection('tv', allItems.tv);
+    renderSection('filmes', allItems.filmes);
+    renderSection('series', allItems.series);
   }
 
   function renderSection(section, items) {
-    const catList = document.getElementById("catList-" + section);
-    const grid = document.getElementById("items-" + section);
-    if (catList) catList.innerHTML = "";
+    const catList = document.getElementById('catList-' + section);
+    if (catList) catList.innerHTML = '';
+
+    const grid = document.getElementById('items-' + section);
     grid.innerHTML = "";
 
     let catArray = Array.from(new Set(items.map(i => i.group || "Outros")));
 
-    // ordena ⭐ no topo, ❌ no final, resto alfabético
+    // Order by: ⭐ top, ❌ end, alphabetic order for ohters
     catArray.sort((a, b) => {
-      const aHasStar = a.includes("⭐");
-      const bHasStar = b.includes("⭐");
-      const aHasX = a.includes("❌");
-      const bHasX = b.includes("❌");
+      const aHasStar = a.includes('⭐');
+      const bHasStar = b.includes('⭐');
+      const aHasX = a.includes('❌');
+      const bHasX = b.includes('❌');
 
       if (aHasStar && !bHasStar) return -1;
       if (!aHasStar && bHasStar) return 1;
@@ -289,21 +324,28 @@
 
     let firstCat = null;
     catArray.forEach(cat => {
-      const btn = document.createElement("button");
-      btn.className = "list-group-item list-group-item-action";
+      const btn = document.createElement('button');
+      btn.className = 'list-group-item list-group-item-action';
       btn.textContent = cat;
-      btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
+      btn.onclick = () => {
+        renderItems(section, items.filter(i => (i.group || 'Outros') === cat));
+
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; 
+      }
       catList.appendChild(btn);
+
       if (!firstCat) firstCat = cat;
     });
-    if (firstCat) renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
+
+    if (firstCat) renderItems(section, items.filter(i => (i.group || 'Outros') === firstCat));
   }
 
   function renderItems(section, list) {
-    const grid = document.getElementById("items-" + section);
-    grid.innerHTML = "";
+    const grid = document.getElementById('items-' + section);
+    grid.innerHTML = '';
 
-    if (section === "series") {
+    if (section === 'series') {
       const seriesMap = {};
       list.forEach(it => {
         const baseName = it.name.replace(/S\d+E\d+/i, '').trim();
@@ -313,9 +355,9 @@
 
       Object.keys(seriesMap).forEach(name => {
         const serieItems = seriesMap[name];
-        const col = document.createElement("div");
-        col.className = "col-6 col-md-3 col-lg-2";
         const logo = serieItems[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
+        const col = document.createElement('div');
+        col.className = 'col-6 col-md-3 col-lg-2';
         col.innerHTML = `
             <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
               <div class="ratio ratio-16x9">
@@ -326,11 +368,10 @@
               </div>
             </div>
           `;
-        col.querySelector(".card").addEventListener("click", () => openSeriesModal(name, serieItems));
+        col.querySelector('.card').addEventListener('click', () => openSeriesModal(name, serieItems));
         grid.appendChild(col);
       });
     } else if (section === 'tv') {
-      // New: group tv channels by baseName
       const grouped = {};
       list.forEach(it => { const base = it.baseName || getBaseChannelName(it.name); (grouped[base] ||= []).push(it); });
       Object.keys(grouped).sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(base => {
@@ -343,7 +384,6 @@
         grid.appendChild(col);
       });
     } else {
-      // filmes unchanged
       list.forEach(it => {
         const col = document.createElement('div');
         col.className='col-6 col-md-3 col-lg-2';
@@ -354,30 +394,43 @@
     }
   }
 
-  function performSearch(section){
-    const input = document.getElementById('search-'+section); if(!input) return; const q = input.value.trim().toLowerCase(); if(!q){ renderSection(section, allItems[section]); return; }
-    const filtered = (allItems[section]||[]).filter(i => (i.name||'').toLowerCase().includes(q) || (i.baseName||'').toLowerCase().includes(q));
+  function performSearch(section) {
+    const input = document.getElementById('search-'+section);
+    if (!input) return;
+
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      renderSection(section, allItems[section]);
+      return;
+    }
+    
+    const filtered = (allItems[section] || []).filter(i => (i.name || '').toLowerCase().includes(q) || (i.baseName || '').toLowerCase().includes(q));
     renderItems(section, filtered);
   }
 
   function setupSearchListeners() {
     ['tv','filmes','series'].forEach(section => {
-      const input = document.getElementById('search-' + section);
       const btn = document.getElementById('search-btn-' + section);
       const clear = document.getElementById('clear-' + section);
+      const input = document.getElementById('search-' + section);
       if (input) {
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
             performSearch(section);
           }
+
           if (e.key === 'Escape') {
             input.value = '';
             performSearch(section);
           }
         });
       }
-      if (btn) btn.addEventListener('click', () => performSearch(section));
+
+      if (btn) {
+        btn.addEventListener('click', () => performSearch(section));
+      }
+      
       if (clear) {
         clear.addEventListener('click', () => {
           const inp = document.getElementById('search-' + section);
@@ -392,17 +445,21 @@
       tab.addEventListener('shown.bs.tab', (e) => {
         const target = e.target.getAttribute('data-bs-target');
         if (!target) return;
+        
         const sec = target.replace('#tab-','');
         const inp = document.getElementById('search-' + sec);
-        if (inp) { inp.value = ''; performSearch(sec); }
+        if (inp) {
+          inp.value = '';
+          performSearch(sec);
+        }
       });
     });
   }
 
   function openSeriesModal(serieName, serieItems) {
-    const modalTitle = document.getElementById("seriesModalLabel");
-    const container = document.getElementById("seriesSeasons");
-    container.innerHTML = "";
+    const modalTitle = document.getElementById('seriesModalLabel');
+    const container = document.getElementById('seriesSeasons');
+    container.innerHTML = '';
     modalTitle.textContent = serieName;
 
     const seasonsMap = {};
@@ -413,45 +470,45 @@
       seasonsMap[seasonNum].push(it);
     });
 
-    Object.keys(seasonsMap).sort((a,b)=>a-b).forEach(season => {
+    Object.keys(seasonsMap).sort((a, b) => a-b).forEach(season => {
       const episodes = seasonsMap[season];
-      const seasonDiv = document.createElement("div");
-      seasonDiv.className = "mb-3 border-bottom pb-2";
+      const seasonDiv = document.createElement('div');
+      seasonDiv.className = 'mb-3 border-bottom pb-2';
 
       const allWatched = episodes.every(ep => getWatched().includes(ep.url));
 
-      const header = document.createElement("h6");
-      header.style.cursor = "pointer";
-      header.className = "mb-2";
+      const header = document.createElement('h6');
+      header.style.cursor = 'pointer';
+      header.className = 'mb-2';
       header.innerHTML = `Temporada ${season} <i class="bi ${allWatched ? 'bi-chevron-down' : 'bi-chevron-up'}"></i>`;
       seasonDiv.appendChild(header);
 
-      const epList = document.createElement("div");
-      epList.style.display = allWatched ? "none" : "block";
+      const epList = document.createElement('div');
+      epList.style.display = allWatched ? 'none' : 'block';
 
       episodes.forEach(ep => {
-        const epDiv = document.createElement("div");
-        epDiv.className = "d-flex justify-content-between align-items-center mb-1";
+        const epDiv = document.createElement('div');
+        epDiv.className = 'd-flex justify-content-between align-items-center mb-1';
 
         const watched = getWatched().includes(ep.url);
 
-        const watchBtn = document.createElement("button");
-        watchBtn.className = "btn btn-sm btn-outline-light me-1";
-        watchBtn.innerHTML = "▶️ Assistir";
-        watchBtn.addEventListener("click", () => {
+        const watchBtn = document.createElement('button');
+        watchBtn.className = 'btn btn-sm btn-outline-light me-1';
+        watchBtn.innerHTML = '▶️ Assistir';
+        watchBtn.addEventListener('click', () => {
           playItem(ep);
         });
 
-        const toggleBtn = document.createElement("button");
+        const toggleBtn = document.createElement('button');
         toggleBtn.className = `btn btn-sm ${watched ? 'btn-success' : 'btn-outline-light'}`;
         toggleBtn.innerHTML = `<i class="bi ${watched ? 'bi-eye-slash' : 'bi-eye'}"></i>`;
         toggleBtn.addEventListener("click", () => toggleWatchedIcon(ep.url, toggleBtn));
 
-        const btnGroup = document.createElement("div");
+        const btnGroup = document.createElement('div');
         btnGroup.appendChild(watchBtn);
         btnGroup.appendChild(toggleBtn);
 
-        const nameSpan = document.createElement("span");
+        const nameSpan = document.createElement('span');
         nameSpan.textContent = ep.name;
 
         epDiv.appendChild(nameSpan);
@@ -460,13 +517,13 @@
         epList.appendChild(epDiv);
       });
 
-      header.addEventListener("click", () => {
-        if (epList.style.display === "none") {
-          epList.style.display = "block";
-          header.querySelector("i").classList.replace("bi-chevron-down","bi-chevron-up");
+      header.addEventListener('click', () => {
+        if (epList.style.display === 'none') {
+          epList.style.display = 'block';
+          header.querySelector('i').classList.replace('bi-chevron-down', 'bi-chevron-up');
         } else {
-          epList.style.display = "none";
-          header.querySelector("i").classList.replace("bi-chevron-up","bi-chevron-down");
+          epList.style.display = 'none';
+          header.querySelector('i').classList.replace('bi-chevron-up', 'bi-chevron-down');
         }
       });
 
@@ -474,7 +531,7 @@
       container.appendChild(seasonDiv);
     });
 
-    new bootstrap.Modal(document.getElementById("seriesModal")).show();
+    new bootstrap.Modal(document.getElementById('seriesModal')).show();
   }
 
   (function setupMp4ModalListeners() {
@@ -483,23 +540,32 @@
     if (!modalEl) return;
 
     modalEl.addEventListener('hidden.bs.modal', function() {
-      player.api("stop");
+      player.api('stop');
     });
   })();
 
-  function updateAlternativesUI(currentItem, variants){
+  function updateAlternativesUI(currentItem, variants) {
     const altDiv = document.getElementById('channel-alternatives');
-    if(!altDiv) return;
-    if(!variants || variants.length <= 1){ altDiv.innerHTML=''; altDiv.style.display='none'; return; }
+    if (!altDiv) return;
+
+    if (!variants || variants.length <= 1) {
+      altDiv.innerHTML = '';
+      altDiv.style.display = 'none';
+      return;
+    }
+
     const base = currentItem.baseName || getBaseChannelName(currentItem.name);
-    const links = variants.filter(v=>v!==currentItem).map(v=>`<a href="#" data-name="${encodeURIComponent(v.name)}">${getVariantExtra(base, v.name)}</a>`).join(' ');
+    const links = variants
+      .filter(v => v !== currentItem)
+      .map(v => `<a href="#" data-name="${encodeURIComponent(v.name)}">${getVariantExtra(base, v.name)}</a>`)
+      .join(' ');
     altDiv.innerHTML = `<span class="label">Alternativas:</span>${links}`;
-    altDiv.style.display='block';
+    altDiv.style.display = 'block';
     [...altDiv.querySelectorAll('a')].forEach(
-      a=>a.addEventListener('click', e => {
+      a => a.addEventListener('click', e => {
         e.preventDefault();
         const name = decodeURIComponent(a.getAttribute('data-name'));
-        const found = variants.find(v=>v.name===name);
+        const found = variants.find(v => v.name === name);
         if (found) playItem(found, variants, false);
       })
     );
@@ -510,8 +576,15 @@
     if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
       url = url.replace(/^https?:\/\/[^/]+/, 'https://bmtop.online').replace(/\.ts$/, '.m3u8');
     }
+
     const title = item.baseName || getBaseChannelName(item.name) || item.name;
-    try { player = new Playerjs({ id: 'player', file: url, title }); } catch(e){ console.error(e); }
+
+    try {
+      player = new Playerjs({ id: 'player', file: url, title });
+    } catch(e) {
+      console.error(e);
+    }
+
     const modal = document.getElementById('mp4Modal');
     const modalTitle = document.getElementById('player-modal-title');
     modalTitle.textContent = title;
@@ -521,7 +594,7 @@
     if (openModal) new bootstrap.Modal(modal).show();
   }
 
-  var player='';
+  var player = '';
 </script>
 </body>
 </html>
