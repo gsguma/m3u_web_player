@@ -27,227 +27,297 @@
     .modal-header { padding-bottom: 10px; padding-top: 10px; }
     .modal-body { padding-top: 0; margin-top: 0; }
     #mp4Modal, #seriesModal { background: #000000d9; }
+
+    /* search positioning */
+    .cat-with-search { display:flex; align-items:center; gap:0.5rem; }
+    .cat-with-search h6 { font-size:0.85rem; margin:0; white-space:nowrap; font-weight:600; }
+    .search-input { background:#2d2d2d; color:#fff; border:1px solid #6c6c6c; }
+
+    /* input-with-clear wrapper */
+    .search-wrapper{position:relative; width:100%; max-width:180px}
+    .search-wrapper .btn-clear-inside{position:absolute; right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#ddd; padding:0 6px; font-size:0.85rem; cursor:pointer}
+    .search-wrapper .btn-clear-inside:hover{color:#fff}
+    .search-wrapper .btn-search-inside{position:absolute; right:4px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#ddd; padding:4px; cursor:pointer}
+    .search-wrapper input{padding-right:56px}
+
+    @media (max-width:768px){ .search-wrapper{max-width:120px} }
+
+    /* Added alternatives styling */
+    #channel-alternatives { display:none; }
+    #channel-alternatives span.label { font-weight:600; margin-right:.5rem; }
+    #channel-alternatives a { color:#8ecbff; text-decoration:none; margin-right:.75rem; font-size:.8rem; }
+    #channel-alternatives a:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
-  <div class="container-fluid py-3">
-    <div class="input-group mb-3">
-      <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
-      <button id="load-list" class="btn btn-primary" onclick="loadFromUrl(document.getElementById('urlInput').value)">
-        Carregar
-      </button>
-    </div>
-    <div id="status" class="small text-warning mb-3"></div>
+<div class="container-fluid py-3">
+  <div class="input-group mb-3">
+    <label for="urlInput" class="visually-hidden">M3U URL</label>
+    <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
+    <button id="load-list" class="btn btn-primary" onclick="loadFromUrl(document.getElementById('urlInput').value)">
+      Carregar
+    </button>
+  </div>
+  <div id="status" class="small text-warning mb-3"></div>
 
-    <ul class="nav nav-tabs" id="tabs" role="tablist">
-      <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button>
-      </li>
-    </ul>
+  <ul class="nav nav-tabs" id="tabs" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tv">Canais de TV</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">Filmes</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-series">Séries</button>
+    </li>
+  </ul>
 
-    <div class="tab-content">
-      <div class="tab-pane fade show active" id="tab-tv">
-        <div class="row mt-3">
-          <div class="col-md-3"><h6>Categorias</h6><div id="catList-tv" class="list-group"></div></div>
-          <div class="col-md-9"><div class="row g-3" id="items-tv"></div></div>
-        </div>
-      </div>
-      <div class="tab-pane fade" id="tab-filmes">
-        <div class="row mt-3">
-          <div class="col-md-3">
-            <h6>Categorias</h6>
-            <div id="catList-filmes" class="list-group"></div>
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="tab-tv">
+      <div class="row mt-3">
+        <div class="col-md-3">
+          <div class="cat-with-search mb-2">
+            <h6 class="mb-0">Categorias</h6>
+            <div class="input-group input-group-sm search-wrapper">
+              <input id="search-tv" class="form-control form-control-sm search-input" type="text" placeholder="Pesquisar" aria-label="Pesquisar canais">
+              <button id="clear-tv" class="btn-clear-inside" type="button" aria-label="Limpar">&times;</button>
+              <button id="search-btn-tv" class="btn-search-inside" type="button" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            </div>
           </div>
-          <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
+          <div id="catList-tv" class="list-group"></div>
         </div>
-      </div>
-      <div class="tab-pane fade" id="tab-series">
-        <div class="row mt-3">
-          <div class="col-md-3"><h6>Categorias</h6><div id="catList-series" class="list-group"></div></div>
-          <div class="col-md-9"><div class="row g-3" id="items-series"></div></div>
-        </div>
+        <div class="col-md-9"><div class="row g-3" id="items-tv"></div></div>
       </div>
     </div>
 
-    <!-- Modal Séries -->
-    <div class="modal fade" id="seriesModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-        <div class="modal-content bg-dark text-white">
-          <div class="modal-header border-0">
-            <h5 class="modal-title" id="seriesModalLabel">Série</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="tab-pane fade" id="tab-filmes">
+      <div class="row mt-3">
+        <div class="col-md-3">
+          <div class="cat-with-search mb-2">
+            <h6 class="mb-0">Categorias</h6>
+            <div class="input-group input-group-sm search-wrapper">
+              <input id="search-filmes" class="form-control form-control-sm search-input" type="text" placeholder="Pesquisar" aria-label="Pesquisar filmes">
+              <button id="clear-filmes" class="btn-clear-inside" type="button" aria-label="Limpar">&times;</button>
+              <button id="search-btn-filmes" class="btn-search-inside" type="button" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            </div>
           </div>
-          <div class="modal-body"><div id="seriesSeasons"></div></div>
+          <div id="catList-filmes" class="list-group"></div>
         </div>
-      </div>
-    </div>
-    
-    <!-- Player Modal -->
-    <div class="modal fade" id="mp4Modal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content bg-dark text-white">
-          <div class="modal-header border-0">
-            <span class="modal-title" id="player-modal-title">Player</span>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div id="player"></div>
-          </div>
-        </div>
+        <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
       </div>
     </div>
 
+    <div class="tab-pane fade" id="tab-series">
+      <div class="row mt-3">
+        <div class="col-md-3">
+          <div class="cat-with-search mb-2">
+            <h6 class="mb-0">Categorias</h6>
+            <div class="input-group input-group-sm search-wrapper">
+              <input id="search-series" class="form-control form-control-sm search-input" type="text" placeholder="Pesquisar" aria-label="Pesquisar séries">
+              <button id="clear-series" class="btn-clear-inside" type="button" aria-label="Limpar">&times;</button>
+              <button id="search-btn-series" class="btn-search-inside" type="button" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+          <div id="catList-series" class="list-group"></div>
+        </div>
+        <div class="col-md-9"><div class="row g-3" id="items-series"></div></div>
+      </div>
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    let allItems = { tv: [], filmes: [], series: [] };
+  <!-- Modal Séries -->
+  <div class="modal fade" id="seriesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="seriesModalLabel">Série</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body"><div id="seriesSeasons"></div></div>
+      </div>
+    </div>
+  </div>
 
-    function getWatched() {
-      return JSON.parse(localStorage.getItem("watchedEpisodes") || "[]");
-    }
-    function saveWatched(list) {
-      localStorage.setItem("watchedEpisodes", JSON.stringify(list));
-    }
+  <!-- Player Modal -->
+  <div class="modal fade" id="mp4Modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-0">
+          <span class="modal-title" id="player-modal-title">Player</span>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="channel-alternatives" class="mb-2 small"></div>
+          <div id="player"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    function toggleWatchedIcon(url, btn) {
-      let watched = getWatched();
-      const icon = btn.querySelector("i");
-      if (watched.includes(url)) {
-        watched = watched.filter(u => u !== url);
-        icon.classList.replace("bi-eye-slash", "bi-eye");
-        btn.classList.replace("btn-success", "btn-outline-light");
-      } else {
-        watched.push(url);
-        icon.classList.replace("bi-eye", "bi-eye-slash");
-        btn.classList.replace("btn-outline-light", "btn-success");
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let allItems = { tv: [], filmes: [], series: [] };
+
+  // --- Added helpers for channel grouping ---
+  function getBaseChannelName(name){
+    if(!name) return '';
+    let base = name.trim();
+    base = base.replace(/\s*\[ALT\]$/i,'').trim();
+    // strip trailing quality tokens repeatedly
+    const quality = /(\s+(FHD|FULL ?HD|UHD|4K|HD|SD|1080P|720P))$/i;
+    while(quality.test(base)) base = base.replace(quality,'').trim();
+    return base;
+  }
+  function getVariantExtra(baseName, fullName){
+    if(!fullName) return '';
+    const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&');
+    let rest = fullName.replace(new RegExp('^'+safeBase,'i'),'').trim();
+    if(!rest) rest = 'Principal';
+    return rest;
+  }
+
+  function getWatched() {
+    return JSON.parse(localStorage.getItem("watchedEpisodes") || "[]");
+  }
+  function saveWatched(list) {
+    localStorage.setItem("watchedEpisodes", JSON.stringify(list));
+  }
+
+  function toggleWatchedIcon(url, btn) {
+    let watched = getWatched();
+    const icon = btn.querySelector("i");
+    if (watched.includes(url)) {
+      watched = watched.filter(u => u !== url);
+      icon.classList.replace("bi-eye-slash", "bi-eye");
+      btn.classList.replace("btn-success", "btn-outline-light");
+    } else {
+      watched.push(url);
+      icon.classList.replace("bi-eye", "bi-eye-slash");
+      btn.classList.replace("btn-outline-light", "btn-success");
+    }
+    saveWatched(watched);
+  }
+
+  async function loadFromUrl(url) {
+    const status = document.getElementById('status')
+    const urlInput = document.getElementById('urlInput');
+    const btnLoadList = document.getElementById('load-list');
+
+    urlInput.disabled = true;
+    btnLoadList.disabled = true;
+    btnLoadList.textContent = "Carregando...";
+
+    try {
+      let resp;
+      try { resp = await fetch(url); }
+      catch { resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url)); }
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const text = await resp.text();
+      parseM3U(text);
+      localStorage.setItem('iptv_m3u_url', url);
+    } catch(e) {
+      console.error(e);
+      status.classList.add('d-none');
+      document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
+    } finally {
+      urlInput.disabled = false;
+      btnLoadList.disabled = false;
+      btnLoadList.textContent = "Atualizar Lista";
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const lastUrl = localStorage.getItem('iptv_m3u_url');
+    if (lastUrl) {
+      document.getElementById('urlInput').value = lastUrl;
+      loadFromUrl(lastUrl);
+    }
+    setupSearchListeners();
+  });
+
+  function parseM3U(text) {
+    allItems = { tv: [], filmes: [], series: [] };
+    const lines = text.split(/\r?\n/);
+    let current = {};
+    for (const line of lines) {
+      if (line.startsWith("#EXTINF")) {
+        const name = line.split(",").pop().trim();
+        const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
+        const group = /group-title="(.*?)"/.exec(line);
+        current = { name, logo: tvgLogo ? tvgLogo[1] : "", group: group ? group[1] : "Outros" };
+      } else if (line && !line.startsWith("#")) {
+        current.url = line.trim();
+        if (/series/i.test(current.url)) allItems.series.push(current);
+        else if (/movie/i.test(current.url)) allItems.filmes.push(current);
+        else if (/.ts/i.test(current.url) || /.m3u8/i.test(current.url)) { current.baseName = getBaseChannelName(current.name); allItems.tv.push(current); }
+        current = {};
       }
-      saveWatched(watched);
     }
+    renderAll();
+  }
 
-    async function loadFromUrl(url) {
-      const status = document.getElementById('status')
-      const urlInput = document.getElementById('urlInput');
-      const btnLoadList = document.getElementById('load-list');
+  function renderAll() {
+    renderSection("tv", allItems.tv);
+    renderSection("filmes", allItems.filmes);
+    renderSection("series", allItems.series);
+  }
 
-      urlInput.disabled = true;
-      btnLoadList.disabled = true;
-      btnLoadList.textContent = "Carregando...";
+  function renderSection(section, items) {
+    const catList = document.getElementById("catList-" + section);
+    const grid = document.getElementById("items-" + section);
+    if (catList) catList.innerHTML = "";
+    grid.innerHTML = "";
 
-      try {
-        let resp;
-        try { resp = await fetch(url); }
-        catch { resp = await fetch("https://corsproxy.io/?" + encodeURIComponent(url)); }
-        if (!resp.ok) throw new Error("HTTP " + resp.status);
-        const text = await resp.text();
-        parseM3U(text);
-        localStorage.setItem('iptv_m3u_url', url);
-      } catch(e) {
-        console.error(e);
-        status.classList.add('d-none');
-        document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
-      } finally {
-        urlInput.disabled = false;
-        btnLoadList.disabled = false;
-        btnLoadList.textContent = "Atualizar Lista";
-      }
-    }
+    let catArray = Array.from(new Set(items.map(i => i.group || "Outros")));
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const lastUrl = localStorage.getItem('iptv_m3u_url');
-      if (lastUrl) {
-        document.getElementById('urlInput').value = lastUrl;
-        loadFromUrl(lastUrl);
-      }
+    // ordena ⭐ no topo, ❌ no final, resto alfabético
+    catArray.sort((a, b) => {
+      const aHasStar = a.includes("⭐");
+      const bHasStar = b.includes("⭐");
+      const aHasX = a.includes("❌");
+      const bHasX = b.includes("❌");
+
+      if (aHasStar && !bHasStar) return -1;
+      if (!aHasStar && bHasStar) return 1;
+
+      if (aHasX && !bHasX) return 1;
+      if (!aHasX && bHasX) return -1;
+
+      return a.localeCompare(b, 'pt-BR');
     });
 
-    function parseM3U(text) {
-      allItems = { tv: [], filmes: [], series: [] };
-      const lines = text.split(/\r?\n/);
-      let current = {};
-      for (const line of lines) {
-        if (line.startsWith("#EXTINF")) {
-          const name = line.split(",").pop().trim();
-          const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
-          const group = /group-title="(.*?)"/.exec(line);
-          current = { name, logo: tvgLogo ? tvgLogo[1] : "", group: group ? group[1] : "Outros" };
-        } else if (line && !line.startsWith("#")) {
-          current.url = line.trim();
-          if (/series/i.test(current.url)) allItems.series.push(current);
-          else if (/movie/i.test(current.url)) allItems.filmes.push(current);
-          else if (/.ts/i.test(current.url)) allItems.tv.push(current);
-          current = {};
-        }
-      }
-      renderAll();
-    }
+    let firstCat = null;
+    catArray.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.className = "list-group-item list-group-item-action";
+      btn.textContent = cat;
+      btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
+      catList.appendChild(btn);
+      if (!firstCat) firstCat = cat;
+    });
+    if (firstCat) renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
+  }
 
-    function renderAll() {
-      renderSection("tv", allItems.tv);
-      renderSection("filmes", allItems.filmes);
-      renderSection("series", allItems.series);
-    }
+  function renderItems(section, list) {
+    const grid = document.getElementById("items-" + section);
+    grid.innerHTML = "";
 
-    function renderSection(section, items) {
-      const catList = document.getElementById("catList-" + section);
-      const grid = document.getElementById("items-" + section);
-      if (catList) catList.innerHTML = "";
-      grid.innerHTML = "";
-
-      let catArray = Array.from(new Set(items.map(i => i.group || "Outros")));
-
-      // ordena ⭐ no topo, ❌ no final, resto alfabético
-      catArray.sort((a, b) => {
-        const aHasStar = a.includes("⭐");
-        const bHasStar = b.includes("⭐");
-        const aHasX = a.includes("❌");
-        const bHasX = b.includes("❌");
-
-        if (aHasStar && !bHasStar) return -1;
-        if (!aHasStar && bHasStar) return 1;
-
-        if (aHasX && !bHasX) return 1;
-        if (!aHasX && bHasX) return -1;
-
-        return a.localeCompare(b, 'pt-BR');
+    if (section === "series") {
+      const seriesMap = {};
+      list.forEach(it => {
+        const baseName = it.name.replace(/S\d+E\d+/i, '').trim();
+        if (!seriesMap[baseName]) seriesMap[baseName] = [];
+        seriesMap[baseName].push(it);
       });
 
-      let firstCat = null;
-      catArray.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.className = "list-group-item list-group-item-action";
-        btn.textContent = cat;
-        btn.onclick = () => renderItems(section, items.filter(i => (i.group||"Outros") === cat));
-        catList.appendChild(btn);
-        if (!firstCat) firstCat = cat;
-      });
-      if (firstCat) renderItems(section, items.filter(i => (i.group||"Outros") === firstCat));
-    }
-
-    function renderItems(section, list) {
-      const grid = document.getElementById("items-" + section);
-      grid.innerHTML = "";
-
-      if (section === "series") {
-        const seriesMap = {};
-        list.forEach(it => {
-          const baseName = it.name.replace(/S\d+E\d+/i, '').trim();
-          if (!seriesMap[baseName]) seriesMap[baseName] = [];
-          seriesMap[baseName].push(it);
-        });
-
-        Object.keys(seriesMap).forEach(name => {
-          const serieItems = seriesMap[name];
-          const col = document.createElement("div");
-          col.className = "col-6 col-md-3 col-lg-2";
-          const logo = serieItems[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
-          col.innerHTML = `
+      Object.keys(seriesMap).forEach(name => {
+        const serieItems = seriesMap[name];
+        const col = document.createElement("div");
+        col.className = "col-6 col-md-3 col-lg-2";
+        const logo = serieItems[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
+        col.innerHTML = `
             <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
               <div class="ratio ratio-16x9">
                 <img src="${logo}" class="card-img-top" alt="${name}">
@@ -257,135 +327,202 @@
               </div>
             </div>
           `;
-          col.querySelector(".card").addEventListener("click", () => openSeriesModal(name, serieItems));
-          grid.appendChild(col);
-        });
-      } else {
-        list.forEach(it => {
-          const col = document.createElement("div");
-          col.className = "col-6 col-md-3 col-lg-2";
-          col.innerHTML = `
-            <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
-              <div class="ratio ratio-16x9">
-                <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top"
-                  alt="${it.name}">
-              </div>
-              <div class="card-body p-1 text-center">
-                <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
-              </div>
-            </div>
-          `;
-          col.querySelector(".card").addEventListener("click", () => playItem(it));
-          grid.appendChild(col);
-        });
-      }
-    }
-
-    function openSeriesModal(serieName, serieItems) {
-      const modalTitle = document.getElementById("seriesModalLabel");
-      const container = document.getElementById("seriesSeasons");
-      container.innerHTML = "";
-      modalTitle.textContent = serieName;
-
-      const seasonsMap = {};
-      serieItems.forEach(it => {
-        const match = it.name.match(/S(\d+)E(\d+)/i);
-        const seasonNum = match ? parseInt(match[1]) : 1;
-        if (!seasonsMap[seasonNum]) seasonsMap[seasonNum] = [];
-        seasonsMap[seasonNum].push(it);
+        col.querySelector(".card").addEventListener("click", () => openSeriesModal(name, serieItems));
+        grid.appendChild(col);
       });
+    } else if (section === 'tv') {
+      // New: group tv channels by baseName
+      const grouped = {};
+      list.forEach(it => { const base = it.baseName || getBaseChannelName(it.name); (grouped[base] ||= []).push(it); });
+      Object.keys(grouped).sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(base => {
+        const variants = grouped[base];
+        const primary = variants[0];
+        const col = document.createElement('div');
+        col.className = 'col-6 col-md-3 col-lg-2';
+        col.innerHTML = `\n<div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">\n  <div class="ratio ratio-16x9">\n    <img src="${primary.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${base}">\n  </div>\n  <div class="card-body p-1 text-center">\n    <h6 class="card-title mb-0 text-truncate">${base}</h6>\n  </div>\n</div>`;
+        col.querySelector('.card').addEventListener('click',()=>playItem(primary, variants));
+        grid.appendChild(col);
+      });
+    } else {
+      // filmes unchanged
+      list.forEach(it => {
+        const col = document.createElement('div');
+        col.className='col-6 col-md-3 col-lg-2';
+        col.innerHTML = `\n<div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">\n  <div class="ratio ratio-16x9">\n    <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${it.name}">\n  </div>\n  <div class="card-body p-1 text-center">\n    <h6 class="card-title mb-0 text-truncate">${it.name}</h6>\n  </div>\n</div>`;
+        col.querySelector('.card').addEventListener('click',()=>playItem(it));
+        grid.appendChild(col);
+      });
+    }
+  }
 
-      Object.keys(seasonsMap).sort((a,b)=>a-b).forEach(season => {
-        const episodes = seasonsMap[season];
-        const seasonDiv = document.createElement("div");
-        seasonDiv.className = "mb-3 border-bottom pb-2";
+  function performSearch(section){
+    const input = document.getElementById('search-'+section); if(!input) return; const q = input.value.trim().toLowerCase(); if(!q){ renderSection(section, allItems[section]); return; }
+    const filtered = (allItems[section]||[]).filter(i => (i.name||'').toLowerCase().includes(q) || (i.baseName||'').toLowerCase().includes(q));
+    renderItems(section, filtered);
+  }
 
-        const allWatched = episodes.every(ep => getWatched().includes(ep.url));
-
-        const header = document.createElement("h6");
-        header.style.cursor = "pointer";
-        header.className = "mb-2";
-        header.innerHTML = `Temporada ${season} <i class="bi ${allWatched ? 'bi-chevron-down' : 'bi-chevron-up'}"></i>`;
-        seasonDiv.appendChild(header);
-
-        const epList = document.createElement("div");
-        epList.style.display = allWatched ? "none" : "block";
-
-        episodes.forEach(ep => {
-          const epDiv = document.createElement("div");
-          epDiv.className = "d-flex justify-content-between align-items-center mb-1";
-
-          const watched = getWatched().includes(ep.url);
-
-          const watchBtn = document.createElement("button");
-          watchBtn.className = "btn btn-sm btn-outline-light me-1";
-          watchBtn.innerHTML = "▶️ Assistir";
-          watchBtn.addEventListener("click", () => {
-            playItem(ep);
-          });
-
-          const toggleBtn = document.createElement("button");
-          toggleBtn.className = `btn btn-sm ${watched ? 'btn-success' : 'btn-outline-light'}`;
-          toggleBtn.innerHTML = `<i class="bi ${watched ? 'bi-eye-slash' : 'bi-eye'}"></i>`;
-          toggleBtn.addEventListener("click", () => toggleWatchedIcon(ep.url, toggleBtn));
-
-          const btnGroup = document.createElement("div");
-          btnGroup.appendChild(watchBtn);
-          btnGroup.appendChild(toggleBtn);
-
-          const nameSpan = document.createElement("span");
-          nameSpan.textContent = ep.name;
-
-          epDiv.appendChild(nameSpan);
-          epDiv.appendChild(btnGroup);
-
-          epList.appendChild(epDiv);
-        });
-
-        header.addEventListener("click", () => {
-          if (epList.style.display === "none") {
-            epList.style.display = "block";
-            header.querySelector("i").classList.replace("bi-chevron-down","bi-chevron-up");
-          } else {
-            epList.style.display = "none";
-            header.querySelector("i").classList.replace("bi-chevron-up","bi-chevron-down");
+  function setupSearchListeners() {
+    ['tv','filmes','series'].forEach(section => {
+      const input = document.getElementById('search-' + section);
+      const btn = document.getElementById('search-btn-' + section);
+      const clear = document.getElementById('clear-' + section);
+      if (input) {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch(section);
+          }
+          if (e.key === 'Escape') {
+            input.value = '';
+            performSearch(section);
           }
         });
-
-        seasonDiv.appendChild(epList);
-        container.appendChild(seasonDiv);
-      });
-
-      new bootstrap.Modal(document.getElementById("seriesModal")).show();
-    }
-
-    (function setupMp4ModalListeners() {
-      const modalEl = document.getElementById('mp4Modal');
-
-      if (!modalEl) return;
-
-      modalEl.addEventListener('hidden.bs.modal', function() {
-        player.api("stop");
-      });
-    })();
-
-    function playItem(item) {
-      let url = item.url      
-      if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
-        url = url.replace(/^https?:\/\/[^/]+/, 'https://bmtop.online').replace(/\.ts$/, '.m3u8');
       }
-      
-      const title = item.name;
-      player = new Playerjs({ id: 'player', file: url, title: title });
-      
-      const modalTitle = document.getElementById('player-modal-title');
-      const modal = document.getElementById('mp4Modal');
-      
-      modalTitle.textContent = title;
-      new bootstrap.Modal(modal).show();
-    }
+      if (btn) btn.addEventListener('click', () => performSearch(section));
+      if (clear) {
+        clear.addEventListener('click', () => {
+          const inp = document.getElementById('search-' + section);
+          if (inp) inp.value = '';
+          performSearch(section);
+        });
+      }
+    });
 
-    var player = '';
-  </script>
+    // When switching tabs, clear searches so user sees categories again
+    document.querySelectorAll('#tabs .nav-link').forEach(tab => {
+      tab.addEventListener('shown.bs.tab', (e) => {
+        const target = e.target.getAttribute('data-bs-target');
+        if (!target) return;
+        const sec = target.replace('#tab-','');
+        const inp = document.getElementById('search-' + sec);
+        if (inp) { inp.value = ''; performSearch(sec); }
+      });
+    });
+  }
+
+  function openSeriesModal(serieName, serieItems) {
+    const modalTitle = document.getElementById("seriesModalLabel");
+    const container = document.getElementById("seriesSeasons");
+    container.innerHTML = "";
+    modalTitle.textContent = serieName;
+
+    const seasonsMap = {};
+    serieItems.forEach(it => {
+      const match = it.name.match(/S(\d+)E(\d+)/i);
+      const seasonNum = match ? parseInt(match[1]) : 1;
+      if (!seasonsMap[seasonNum]) seasonsMap[seasonNum] = [];
+      seasonsMap[seasonNum].push(it);
+    });
+
+    Object.keys(seasonsMap).sort((a,b)=>a-b).forEach(season => {
+      const episodes = seasonsMap[season];
+      const seasonDiv = document.createElement("div");
+      seasonDiv.className = "mb-3 border-bottom pb-2";
+
+      const allWatched = episodes.every(ep => getWatched().includes(ep.url));
+
+      const header = document.createElement("h6");
+      header.style.cursor = "pointer";
+      header.className = "mb-2";
+      header.innerHTML = `Temporada ${season} <i class="bi ${allWatched ? 'bi-chevron-down' : 'bi-chevron-up'}"></i>`;
+      seasonDiv.appendChild(header);
+
+      const epList = document.createElement("div");
+      epList.style.display = allWatched ? "none" : "block";
+
+      episodes.forEach(ep => {
+        const epDiv = document.createElement("div");
+        epDiv.className = "d-flex justify-content-between align-items-center mb-1";
+
+        const watched = getWatched().includes(ep.url);
+
+        const watchBtn = document.createElement("button");
+        watchBtn.className = "btn btn-sm btn-outline-light me-1";
+        watchBtn.innerHTML = "▶️ Assistir";
+        watchBtn.addEventListener("click", () => {
+          playItem(ep);
+        });
+
+        const toggleBtn = document.createElement("button");
+        toggleBtn.className = `btn btn-sm ${watched ? 'btn-success' : 'btn-outline-light'}`;
+        toggleBtn.innerHTML = `<i class="bi ${watched ? 'bi-eye-slash' : 'bi-eye'}"></i>`;
+        toggleBtn.addEventListener("click", () => toggleWatchedIcon(ep.url, toggleBtn));
+
+        const btnGroup = document.createElement("div");
+        btnGroup.appendChild(watchBtn);
+        btnGroup.appendChild(toggleBtn);
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = ep.name;
+
+        epDiv.appendChild(nameSpan);
+        epDiv.appendChild(btnGroup);
+
+        epList.appendChild(epDiv);
+      });
+
+      header.addEventListener("click", () => {
+        if (epList.style.display === "none") {
+          epList.style.display = "block";
+          header.querySelector("i").classList.replace("bi-chevron-down","bi-chevron-up");
+        } else {
+          epList.style.display = "none";
+          header.querySelector("i").classList.replace("bi-chevron-up","bi-chevron-down");
+        }
+      });
+
+      seasonDiv.appendChild(epList);
+      container.appendChild(seasonDiv);
+    });
+
+    new bootstrap.Modal(document.getElementById("seriesModal")).show();
+  }
+
+  (function setupMp4ModalListeners() {
+    const modalEl = document.getElementById('mp4Modal');
+
+    if (!modalEl) return;
+
+    modalEl.addEventListener('hidden.bs.modal', function() {
+      player.api("stop");
+    });
+  })();
+
+  function updateAlternativesUI(currentItem, variants){
+    const altDiv = document.getElementById('channel-alternatives');
+    if(!altDiv) return;
+    if(!variants || variants.length <= 1){ altDiv.innerHTML=''; altDiv.style.display='none'; return; }
+    const base = currentItem.baseName || getBaseChannelName(currentItem.name);
+    const links = variants.filter(v=>v!==currentItem).map(v=>`<a href="#" data-name="${encodeURIComponent(v.name)}">${getVariantExtra(base, v.name)}</a>`).join(' ');
+    altDiv.innerHTML = `<span class="label">Alternativas:</span>${links}`;
+    altDiv.style.display='block';
+    [...altDiv.querySelectorAll('a')].forEach(
+      a=>a.addEventListener('click', e => {
+        e.preventDefault();
+        const name = decodeURIComponent(a.getAttribute('data-name'));
+        const found = variants.find(v=>v.name===name);
+        if (found) playItem(found, variants, false);
+      })
+    );
+  }
+
+  function playItem(item, variants, openModal = true) {
+    let url = item.url;
+    if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
+      url = url.replace(/^https?:\/\/[^/]+/, 'https://bmtop.online').replace(/\.ts$/, '.m3u8');
+    }
+    const title = item.baseName || getBaseChannelName(item.name) || item.name;
+    try { player = new Playerjs({ id: 'player', file: url, title }); } catch(e){ console.error(e); }
+    const modal = document.getElementById('mp4Modal');
+    const modalTitle = document.getElementById('player-modal-title');
+    modalTitle.textContent = title;
+
+    updateAlternativesUI(item, variants);
+
+    if (openModal) new bootstrap.Modal(modal).show();
+  }
+
+  var player='';
+</script>
 </body>
 </html>
