@@ -219,7 +219,6 @@
       localStorage.setItem('iptv_m3u_url', url);
     } catch(e) {
       console.error(e);
-      status.classList.add('d-none');
       document.getElementById('status').innerHTML = "⚠️ Erro ao carregar playlist.";
     } finally {
       urlInput.disabled = false;
