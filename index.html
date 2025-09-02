@@ -22,14 +22,15 @@
     .card:hover { transform: scale(1.09); background: #414141; }
     .card-title { font-size: 0.8rem; }
     .card-img-top { object-fit: cover; }
+
+    #items-tv, #items-series, #items-movies { margin-top: 10px !important; }
+    #items-movies .card .ratio, #items-series .card .ratio { height: 32vh !important; }
     .list-group-item { color: #cdcdcd; background-color: #535353; }
-    #items-tv, #items-series, #items-filmes { margin-top: 10px !important; }
-    #items-filmes .card .ratio, #items-series .card .ratio { height: 32vh !important; }
+
     .modal-header { padding-bottom: 10px; padding-top: 10px; }
     .modal-body { padding-top: 0; margin-top: 0; }
-    #player-modal, #seriesModal { background: #000000d9; }
+    #player-modal, #series-modal { background: #000000d9; }
 
-    /* search positioning */
     .cat-with-search { display:flex; align-items:center; gap:0.5rem; }
     .cat-with-search h6 { font-size:0.85rem; margin:0; white-space:nowrap; font-weight:600; }
     .btn-search {
@@ -74,7 +75,7 @@
       </button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-filmes">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-movies">
         <i class="bi bi-film"></i>&nbsp;&nbsp;Filmes
       </button>
     </li>
@@ -102,28 +103,28 @@
               <span id="search-btn-tv" class="btn-search input-group-text"><i class="bi bi-search"></i></span>
             </div>
           </div>
-          <div id="catList-tv" class="list-group"></div>
+          <div id="cat-list-tv" class="list-group"></div>
         </div>
         <div class="col-md-9"><div class="row g-3" id="items-tv"></div></div>
       </div>
     </div>
 
-    <div class="tab-pane fade" id="tab-filmes">
+    <div class="tab-pane fade" id="tab-movies">
       <div class="row mt-3">
         <div class="col-md-3">
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
             <div class="input-group input-group-sm search-wrapper">            
-              <input id="search-filmes" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar filmes">
-              <span id="clear-filmes" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
-              <span id="search-btn-filmes" class="btn-search input-group-text">
+              <input id="search-movies" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar filmes">
+              <span id="clear-movies" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
+              <span id="search-btn-movies" class="btn-search input-group-text">
                 <i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar
               </span>
             </div>
           </div>
-          <div id="catList-filmes" class="list-group"></div>
+          <div id="cat-list-movies" class="list-group"></div>
         </div>
-        <div class="col-md-9"><div class="row g-3" id="items-filmes"></div></div>
+        <div class="col-md-9"><div class="row g-3" id="items-movies"></div></div>
       </div>
     </div>
 
@@ -138,7 +139,7 @@
               <span id="search-btn-series" class="btn-search input-group-text"><i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar</span>
             </div>
           </div>
-          <div id="catList-series" class="list-group"></div>
+          <div id="cat-list-series" class="list-group"></div>
         </div>
         <div class="col-md-9"><div class="row g-3" id="items-series"></div></div>
       </div>
@@ -146,11 +147,11 @@
   </div>
 
   <!-- Series Modal -->
-  <div class="modal fade" id="seriesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="series-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
       <div class="modal-content bg-dark text-white">
         <div class="modal-header border-0">
-          <h5 class="modal-title" id="seriesModalLabel">Série</h5>
+          <h5 class="modal-title" id="series-modal-label">Série</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body"><div id="seriesSeasons"></div></div>
@@ -178,7 +179,7 @@
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
-  let allItems = { tv: [], filmes: [], series: [] };
+  let allItems = { tv: [], movies: [], series: [] };
   var player = '';
 
   // IndexedDB setup
@@ -301,7 +302,7 @@
   });
   
   function parseM3U(text) {
-    allItems = { tv: [], filmes: [], series: [] };
+    allItems = { tv: [], movies: [], series: [] };
     
     let current = {};    
     const lines = text.split(/\r?\n/);
@@ -316,7 +317,7 @@
         if (/series/i.test(current.url)) {
           allItems.series.push(current);
         } else if (/movie/i.test(current.url)) {
-          allItems.filmes.push(current);
+          allItems.movies.push(current);
         } else if (/.ts/i.test(current.url) || /.m3u8/i.test(current.url)) {
           current.baseName = getBaseChannelName(current.name); allItems.tv.push(current);
         }
@@ -362,8 +363,8 @@
       btn.classList.replace('btn-success', 'btn-outline-light');
     } else {
       watched.push(url);
-      icon.classList.replace("bi-eye", "bi-eye-slash");
-      btn.classList.replace("btn-outline-light", "btn-success");
+      icon.classList.replace('bi-eye', 'bi-eye-slash');
+      btn.classList.replace('btn-outline-light', 'btn-success');
     }
     saveWatched(watched);
   }
@@ -384,12 +385,12 @@
   
   function renderAll() {
     renderSection('tv', allItems.tv);
-    renderSection('filmes', allItems.filmes);
+    renderSection('movies', allItems.movies);
     renderSection('series', allItems.series);
   }
 
   function renderSection(section, items) {
-    const catList = document.getElementById('catList-' + section);
+    const catList = document.getElementById('cat-list-' + section);
     if (catList) catList.innerHTML = '';
 
     const grid = document.getElementById('items-' + section);
@@ -397,7 +398,7 @@
 
     let catArray = Array.from(new Set(items.map(i => i.group || 'Outros')));
 
-    // Order by: ⭐ top, ❌ end, alphabetic order for ohters
+    // Order by: ⭐ top, ❌ end, alphabetic order for others
     catArray.sort((a, b) => {
       const aHasStar = a.includes('⭐');
       const bHasStar = b.includes('⭐');
@@ -505,7 +506,7 @@
   }
 
   function setupSearchListeners() {
-    ['tv', 'filmes', 'series'].forEach(section => {
+    ['tv', 'movies', 'series'].forEach(section => {
       const btn = document.getElementById('search-btn-' + section);
       const clear = document.getElementById('clear-' + section);
       const input = document.getElementById('search-' + section);
@@ -553,7 +554,7 @@
   }
 
   function openSeriesModal(serieName, serieItems) {
-    const modalTitle = document.getElementById('seriesModalLabel');
+    const modalTitle = document.getElementById('series-modal-label');
     const container = document.getElementById('seriesSeasons');
     container.innerHTML = '';
     modalTitle.textContent = serieName;
@@ -592,7 +593,7 @@
         watchBtn.className = 'btn btn-sm btn-outline-light me-1';
         watchBtn.innerHTML = '▶️ Assistir';
         watchBtn.addEventListener('click', () => {
-          playItem(ep);
+          playItem(ep, null);
         });
 
         const toggleBtn = document.createElement('button');
@@ -627,7 +628,7 @@
       container.appendChild(seasonDiv);
     });
 
-    new bootstrap.Modal(document.getElementById('seriesModal')).show();
+    new bootstrap.Modal(document.getElementById('series-modal')).show();
   }
 
   (function setupPlayerModalListeners() {
@@ -689,8 +690,6 @@
 
     if (openModal) new bootstrap.Modal(modal).show();
   }
-
-  var player = '';
 </script>
 </body>
 </html>
