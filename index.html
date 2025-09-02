@@ -56,7 +56,7 @@
   </style>
 </head>
 <body>
-<div class="container-fluid py-3">
+  <div class="container-fluid py-3">
   <div id="load-list-panel" class="input-group mb-3">
     <label for="urlInput" class="visually-hidden">M3U URL</label>
     <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
@@ -64,7 +64,8 @@
       Carregar
     </button>
   </div>
-  <div id="status" class="small text-warning mb-3"></div>
+
+  <div id="status"></div>
 
   <ul class="nav nav-tabs" id="tabs" role="tablist">
     <li class="nav-item">
@@ -83,7 +84,7 @@
       </button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" onclick="showSettings()">
+      <button class="nav-link" onclick="toggleSettings()">
         <i class="bi bi-gear"></i>
       </button>
     </li>
@@ -178,58 +179,51 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
   let allItems = { tv: [], filmes: [], series: [] };
+  var player = '';
 
-  function getBaseChannelName(name) {
-    if (!name) return '';
-    let base = name.trim();
-    base = base.replace(/\s*\[ALT\]$/i, '').trim();
+  // IndexedDB setup
+  const DB_NAME = 'iptvDB';
+  const STORE_NAME = 'm3u';
+  const KEY = 'playlist';
 
-    const quality = /(\s+(FHD|FULL ?HD|UHD|4K|HD|SD|1080P|720P))$/i;
-    while(quality.test(base)) base = base.replace(quality, '').trim();
-    return base;
-  }
-  function getVariantExtra(baseName, fullName) {
-    if (!fullName) return '';
-    const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    let rest = fullName.replace(new RegExp('^'+safeBase,'i'), '').trim();
-    if (!rest) rest = 'Principal';
-    return rest;
+  let CURRENT_VERSION = 1;
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, CURRENT_VERSION);
+
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME);
+        }
+      };
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
   }
 
-  function getWatched() {
-    return JSON.parse(localStorage.getItem('watchedEpisodes') || '[]');
-  }
-  function saveWatched(list) {
-    localStorage.setItem('watchedEpisodes', JSON.stringify(list));
+  async function getM3UFromDB() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(KEY);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
   }
 
-  function toggleWatchedIcon(url, btn) {
-    let watched = getWatched();
-    const icon = btn.querySelector('i');
-    if (watched.includes(url)) {
-      watched = watched.filter(u => u !== url);
-      icon.classList.replace('bi-eye-slash', 'bi-eye');
-      btn.classList.replace('btn-success', 'btn-outline-light');
-    } else {
-      watched.push(url);
-      icon.classList.replace("bi-eye", "bi-eye-slash");
-      btn.classList.replace("btn-outline-light", "btn-success");
-    }
-    saveWatched(watched);
-  }
-  
-  function showSettings() {
-    const loadListPanel = document.getElementById('load-list-panel');
-    const btnLoadList = document.getElementById('load-list');
-    
-    if (loadListPanel.classList.contains('d-none')) {
-      loadListPanel.classList.remove('d-none');
-    } else {
-      loadListPanel.classList.add('d-none');
-      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    }
-    
-    btnLoadList.focus();
+  async function saveM3UToDB(text) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.put(text, KEY);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
   }
 
   async function loadFromUrl(url) {
@@ -241,38 +235,71 @@
     urlInput.disabled = true;
     btnLoadList.disabled = true;
     btnLoadList.textContent = 'Carregando...';
-    status.textContent = ''
+    status.textContent = '';
 
     try {
       let resp;
-      try { resp = await fetch(url); }
-      catch { resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url)); }
+      try {
+        resp = await fetch(url);
+      } catch {
+        resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+      }
       if (!resp.ok) throw new Error("HTTP " + resp.status);
+
       const text = await resp.text();
       parseM3U(text);
+
+      await saveM3UToDB(text);
       localStorage.setItem('iptv_m3u_url', url);
+
       loadListPanel.classList.add('d-none');
       status.classList.add('d-none');
-    } catch(e) {
+    } catch (e) {
       console.error(e);
-      status.innerHTML = '⚠️ Erro ao carregar playlist.';
+      status.innerHTML = `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          ⚠️ Algo inesperado aconteceu ao ao carregar playlist, acesse o log do console para mais detalhes.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
       status.classList.remove('d-none');
     } finally {
       urlInput.disabled = false;
       btnLoadList.disabled = false;
       btnLoadList.textContent = 'Atualizar Lista';
+      
+      toggleSettings();
     }
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
+  // Initial load logic
+  window.addEventListener('DOMContentLoaded', async () => {
+    const urlInput = document.getElementById('urlInput');
     const lastUrl = localStorage.getItem('iptv_m3u_url');
-    if (lastUrl) {
-      document.getElementById('urlInput').value = lastUrl;
-      loadFromUrl(lastUrl);
+    
+    toggleSettings();
+
+    try {
+      const cachedText = await getM3UFromDB();
+      if (cachedText) {
+        parseM3U(cachedText);
+        if (lastUrl) urlInput.value = lastUrl;
+        setupSearchListeners();
+        return;
+      }
+    } catch (e) {
+      toggleSettings();
+      console.warn("IndexedDB fetch failed:", e);
     }
+
+    // If not found in DB, try localStorage
+    if (lastUrl) {
+      urlInput.value = lastUrl;
+      await loadFromUrl(lastUrl);
+    }
+
     setupSearchListeners();
   });
-
+  
   function parseM3U(text) {
     allItems = { tv: [], filmes: [], series: [] };
     
@@ -300,6 +327,61 @@
     renderAll();
   }
 
+  function getBaseChannelName(name) {
+    if (!name) return '';
+    let base = name.trim();
+    base = base.replace(/\s*\[ALT\]$/i, '').trim();
+
+    const quality = /(\s+(FHD|FULL ?HD|UHD|4K|HD|SD|1080P|720P))$/i;
+    while(quality.test(base)) base = base.replace(quality, '').trim();
+    return base;
+  }
+  
+  function getVariantExtra(baseName, fullName) {
+    if (!fullName) return '';
+    const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    let rest = fullName.replace(new RegExp('^'+safeBase,'i'), '').trim();
+    if (!rest) rest = 'Principal';
+    return rest;
+  }
+
+  function getWatched() {
+    return JSON.parse(localStorage.getItem('watchedEpisodes') || '[]');
+  }
+
+  function saveWatched(list) {
+    localStorage.setItem('watchedEpisodes', JSON.stringify(list));
+  }
+
+  function toggleWatchedIcon(url, btn) {
+    let watched = getWatched();
+    const icon = btn.querySelector('i');
+    if (watched.includes(url)) {
+      watched = watched.filter(u => u !== url);
+      icon.classList.replace('bi-eye-slash', 'bi-eye');
+      btn.classList.replace('btn-success', 'btn-outline-light');
+    } else {
+      watched.push(url);
+      icon.classList.replace("bi-eye", "bi-eye-slash");
+      btn.classList.replace("btn-outline-light", "btn-success");
+    }
+    saveWatched(watched);
+  }
+  
+  function toggleSettings() {
+    const loadListPanel = document.getElementById('load-list-panel');
+    const btnLoadList = document.getElementById('load-list');
+    
+    if (loadListPanel.classList.contains('d-none')) {
+      loadListPanel.classList.remove('d-none');
+    } else {
+      loadListPanel.classList.add('d-none');
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    }
+    
+    btnLoadList.focus();
+  }
+  
   function renderAll() {
     renderSection('tv', allItems.tv);
     renderSection('filmes', allItems.filmes);
@@ -423,7 +505,7 @@
   }
 
   function setupSearchListeners() {
-    ['tv','filmes','series'].forEach(section => {
+    ['tv', 'filmes', 'series'].forEach(section => {
       const btn = document.getElementById('search-btn-' + section);
       const clear = document.getElementById('clear-' + section);
       const input = document.getElementById('search-' + section);
