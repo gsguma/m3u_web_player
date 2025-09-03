@@ -31,8 +31,8 @@
     .modal-body { padding-top: 0; margin-top: 0; }
     #player-modal, #series-modal { background: #000000d9; }
 
-    .cat-with-search { display:flex; align-items:center; gap:0.5rem; }
-    .cat-with-search h6 { font-size:0.85rem; margin:0; white-space:nowrap; font-weight:600; }
+    .cat-with-search { display: flex; align-items: center; gap: 0.5rem; }
+    .cat-with-search h6 { font-size: 0.85rem; margin: 0; white-space: nowrap; font-weight: 600; }
     .btn-search {
       background: #414141 !important;
       color: #d4d0d0;
@@ -42,18 +42,43 @@
       color: #c6c6c6;
     }
 
-    .search-wrapper { position:relative; width:100%; }
-    .search-wrapper .btn-clear-inside { position:absolute; right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#888; padding:0 6px; font-size:0.85rem; cursor:pointer }
-    .search-wrapper .btn-clear-inside:hover{color:#fff}
-    .search-wrapper .btn-search-inside { position:absolute; right:4px; top:50%; transform:translateY(-50%); border:none; background:transparent; color:#888; padding:4px; cursor:pointer }
-    .search-wrapper input { padding-right:56px }
+    .search-wrapper { position: relative; width: 100%; }
+    .search-wrapper .btn-clear-inside {
+      position: absolute;
+      right: 34px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #888;
+      padding: 0 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .search-wrapper .btn-clear-inside:hover { color: #fff }
+    .search-wrapper .btn-search-inside {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #888;
+      padding: 4px;
+      cursor: pointer;
+    }
+    .search-wrapper input { padding-right: 56px }
 
-    @media (max-width:768px){ .search-wrapper{max-width:120px} }
+    @media(max-width: 768px) {
+      .search-wrapper {
+        max-width: 120px
+      }
+    }
 
-    #channel-alternatives { display:none; }
-    #channel-alternatives span.label { font-weight:600; margin-right:.5rem; }
-    #channel-alternatives a { color:#8ecbff; text-decoration:none; margin-right:.75rem; font-size:.8rem; }
-    #channel-alternatives a:hover { text-decoration:underline; }
+    #channel-alternatives { display: none; }
+    #channel-alternatives span.label { font-weight: 600; margin-right: .5rem; }
+    #channel-alternatives a { color: #8ecbff; text-decoration: none; margin-right: .75rem; font-size: .8rem; }
+    #channel-alternatives a:hover { text-decoration: underline; }
 
     .favorite-icon {
       position: absolute;
@@ -109,7 +134,8 @@
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
             <div class="input-group input-group-sm search-wrapper">
-              <input id="search-tv" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar canais">
+              <input id="search-tv" class="input-search form-control" type="text" placeholder="Pesquisar"
+                aria-label="Pesquisar canais">
               <span id="clear-tv" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
               <span id="search-btn-tv" class="btn-search input-group-text"><i class="bi bi-search"></i></span>
             </div>
@@ -126,7 +152,8 @@
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
             <div class="input-group input-group-sm search-wrapper">            
-              <input id="search-movies" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar filmes">
+              <input id="search-movies" class="input-search form-control" type="text" placeholder="Pesquisar"
+                aria-label="Pesquisar filmes">
               <span id="clear-movies" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
               <span id="search-btn-movies" class="btn-search input-group-text">
                 <i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar
@@ -145,9 +172,12 @@
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
             <div class="input-group input-group-sm search-wrapper">             
-              <input id="search-series" class="input-search form-control" type="text" placeholder="Pesquisar" aria-label="Pesquisar series">
+              <input id="search-series" class="input-search form-control" type="text" placeholder="Pesquisar"
+                aria-label="Pesquisar series">
               <span id="clear-series" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
-              <span id="search-btn-series" class="btn-search input-group-text"><i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar</span>
+              <span id="search-btn-series" class="btn-search input-group-text">
+                <i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar
+              </span>
             </div>
           </div>
           <div id="cat-list-series" class="list-group"></div>
@@ -350,7 +380,7 @@
   function getVariantExtra(baseName, fullName) {
     if (!fullName) return '';
     const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    let rest = fullName.replace(new RegExp('^'+safeBase,'i'), '').trim();
+    let rest = fullName.replace(new RegExp('^'+safeBase, 'i'), '').trim();
     if (!rest) rest = 'Principal';
     return rest;
   }
@@ -366,15 +396,19 @@
   function toggleWatchedIcon(url, btn) {
     let watched = getWatched();
     const icon = btn.querySelector('i');
+
     if (watched.includes(url)) {
       watched = watched.filter(u => u !== url);
+
       icon.classList.replace('bi-eye-slash', 'bi-eye');
       btn.classList.replace('btn-success', 'btn-outline-light');
     } else {
       watched.push(url);
+
       icon.classList.replace('bi-eye', 'bi-eye-slash');
       btn.classList.replace('btn-outline-light', 'btn-success');
     }
+
     saveWatched(watched);
   }
   
@@ -419,8 +453,8 @@
       const item = allItems.tv.find(i => i.url === url);
       if (item) {
         const favoriteUrlsForBase = allItems.tv.filter(i => i.baseName === item.baseName).map(i => i.url);
+
         isCurrentlyFavorite = favoriteUrlsForBase.some(favUrl => favorites.tv.includes(favUrl));
-        
         if (isCurrentlyFavorite) {
           favorites.tv = favorites.tv.filter(favUrl => {
             const favItem = allItems.tv.find(i => i.url === favUrl);
@@ -432,6 +466,11 @@
       }
     } else {
       const index = favorites[section].indexOf(url);
+
+      if (section === 'series') {
+        console.log(url);
+      }
+
       isCurrentlyFavorite = index > -1;
       if (isCurrentlyFavorite) {
         favorites[section].splice(index, 1);
@@ -446,10 +485,9 @@
         const isNowFavorite = isFavorite(section, url);
         iconElement.textContent = isNowFavorite ? '★' : '☆';
         
-        // Check if we are in the favorites view and the item was just unfavorited
         const activeCatButton = document.querySelector(`#cat-list-${section} .list-group-item.active`);
         if (activeCatButton && activeCatButton.textContent.includes('Favoritos') && !isNowFavorite) {
-          activeCatButton.click(); // Re-render the favorites list to remove the item
+          activeCatButton.click();
         }
     }
   }
@@ -459,13 +497,15 @@
     if (!favorites[section]) return false;
     
     if (section === 'tv') {
-        const item = allItems.tv.find(i => i.url === url);
-        if (!item) return false;
-        return favorites.tv.some(favUrl => {
-            const favItem = allItems.tv.find(i => i.url === favUrl);
-            return favItem && favItem.baseName === item.baseName;
-        });
+      const item = allItems.tv.find(i => i.url === url);
+      if (!item) return false;
+
+      return favorites.tv.some(favUrl => {
+        const favItem = allItems.tv.find(i => i.url === favUrl);
+        return favItem && favItem.baseName === item.baseName;
+      });
     }
+
     return favorites[section].includes(url);
   }
   // --- Favorites logic end
@@ -522,6 +562,7 @@
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       }
+
       catList.appendChild(btn);
 
       if (!firstCat) firstCat = btn;
@@ -534,6 +575,7 @@
     } else if (favoritesBtn) {
       // If there are no other categories, make sure favorites is active
       document.querySelectorAll(`#cat-list-${section} .list-group-item`).forEach(b => b.classList.remove('active'));
+
       favoritesBtn.classList.add('active');
       favoritesBtn.onclick();
     }
@@ -602,7 +644,8 @@
           <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
             <span class="favorite-icon" data-url="${primary.url}" data-section="${section}">${isFav ? '★' : '☆'}</span>
             <div class="ratio ratio-16x9">
-              <img src="${primary.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${base}">
+              <img src="${primary.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top"
+                alt="${base}">
             </div>
             <div class="card-body p-1 text-center">
               <h6 class="card-title mb-0 text-truncate">${base}</h6>
@@ -629,7 +672,8 @@
           <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
             <span class="favorite-icon" data-url="${it.url}" data-section="${section}">${isFav ? '★' : '☆'}</span>
             <div class="ratio ratio-16x9">
-              <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${it.name}">
+              <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top"
+                alt="${it.name}">
             </div>
             <div class="card-body p-1 text-center">
               <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
@@ -651,7 +695,7 @@
   }
 
   function performSearch(section) {
-    const input = document.getElementById('search-' +section);
+    const input = document.getElementById('search-' + section);
     if (!input) return;
 
     const q = input.value.trim().toLowerCase();
@@ -660,7 +704,10 @@
       return;
     }
     
-    const filtered = (allItems[section] || []).filter(i => (i.name || '').toLowerCase().includes(q) || (i.baseName || '').toLowerCase().includes(q));
+    const filtered = (allItems[section] || []).filter(
+      i => (i.name || '').toLowerCase().includes(q) || (i.baseName || '').toLowerCase().includes(q)
+    );
+
     renderItems(section, filtered);
   }
 
@@ -706,7 +753,7 @@
         const inp = document.getElementById('search-' + sec);
         if (inp) {
           inp.value = '';
-          renderSection(sec, allItems[sec]); // Call renderSection to reset categories
+          renderSection(sec, allItems[sec]);
         }
       });
     });
