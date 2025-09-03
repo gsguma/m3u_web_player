@@ -54,6 +54,17 @@
     #channel-alternatives span.label { font-weight:600; margin-right:.5rem; }
     #channel-alternatives a { color:#8ecbff; text-decoration:none; margin-right:.75rem; font-size:.8rem; }
     #channel-alternatives a:hover { text-decoration:underline; }
+
+    .favorite-icon {
+      position: absolute;
+      top: -5px;
+      right: 10px;
+      font-size: 27px;
+      cursor: pointer;
+      text-shadow: 0 0 3px black;
+      z-index: 10;
+      color: #e1bb38;
+    }
   </style>
 </head>
 <body>
@@ -146,7 +157,6 @@
     </div>
   </div>
 
-  <!-- Series Modal -->
   <div class="modal fade" id="series-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
       <div class="modal-content bg-dark text-white">
@@ -159,7 +169,6 @@
     </div>
   </div>
 
-  <!-- Player Modal -->
   <div class="modal fade" id="player-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content bg-dark text-white">
@@ -388,6 +397,78 @@
     renderSection('movies', allItems.movies);
     renderSection('series', allItems.series);
   }
+  
+  // --- Favorites logic start
+  function getFavorites() {
+    return JSON.parse(localStorage.getItem('favorites') || '{}');
+  }
+
+  function saveFavorites(favorites) {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }
+
+  function toggleFavorite(section, url, iconElement) {
+    let favorites = getFavorites();
+    if (!favorites[section]) {
+      favorites[section] = [];
+    }
+    
+    let isCurrentlyFavorite = false;
+    
+    if (section === 'tv') {
+      const item = allItems.tv.find(i => i.url === url);
+      if (item) {
+        const favoriteUrlsForBase = allItems.tv.filter(i => i.baseName === item.baseName).map(i => i.url);
+        isCurrentlyFavorite = favoriteUrlsForBase.some(favUrl => favorites.tv.includes(favUrl));
+        
+        if (isCurrentlyFavorite) {
+          favorites.tv = favorites.tv.filter(favUrl => {
+            const favItem = allItems.tv.find(i => i.url === favUrl);
+            return favItem && favItem.baseName !== item.baseName;
+          });
+        } else {
+          favorites.tv.push(url);
+        }
+      }
+    } else {
+      const index = favorites[section].indexOf(url);
+      isCurrentlyFavorite = index > -1;
+      if (isCurrentlyFavorite) {
+        favorites[section].splice(index, 1);
+      } else {
+        favorites[section].push(url);
+      }
+    }
+    
+    saveFavorites(favorites);
+    
+    if (iconElement) {
+        const isNowFavorite = isFavorite(section, url);
+        iconElement.textContent = isNowFavorite ? '★' : '☆';
+        
+        // Check if we are in the favorites view and the item was just unfavorited
+        const activeCatButton = document.querySelector(`#cat-list-${section} .list-group-item.active`);
+        if (activeCatButton && activeCatButton.textContent.includes('Favoritos') && !isNowFavorite) {
+          activeCatButton.click(); // Re-render the favorites list to remove the item
+        }
+    }
+  }
+
+  function isFavorite(section, url) {
+    const favorites = getFavorites();
+    if (!favorites[section]) return false;
+    
+    if (section === 'tv') {
+        const item = allItems.tv.find(i => i.url === url);
+        if (!item) return false;
+        return favorites.tv.some(favUrl => {
+            const favItem = allItems.tv.find(i => i.url === favUrl);
+            return favItem && favItem.baseName === item.baseName;
+        });
+    }
+    return favorites[section].includes(url);
+  }
+  // --- Favorites logic end
 
   function renderSection(section, items) {
     const catList = document.getElementById('cat-list-' + section);
@@ -395,6 +476,21 @@
 
     const grid = document.getElementById('items-' + section);
     grid.innerHTML = "";
+    
+    // Add "Favorites" category at the top
+    const favoritesBtn = document.createElement('button');
+    favoritesBtn.className = 'list-group-item list-group-item-action';
+    favoritesBtn.textContent = '⭐ Favoritos';
+    favoritesBtn.onclick = () => {
+      const favorites = getFavorites();
+      const favoriteUrls = favorites[section] || [];
+      const favoriteItems = allItems[section].filter(item => favoriteUrls.includes(item.url));
+
+      renderItems(section, favoriteItems, true);
+      document.querySelectorAll(`#cat-list-${section} .list-group-item`).forEach(btn => btn.classList.remove('active'));
+      favoritesBtn.classList.add('active');
+    };
+    catList.appendChild(favoritesBtn);
 
     let catArray = Array.from(new Set(items.map(i => i.group || 'Outros')));
 
@@ -413,7 +509,7 @@
 
       return a.localeCompare(b, 'pt-BR');
     });
-
+    
     let firstCat = null;
     catArray.forEach(cat => {
       const btn = document.createElement('button');
@@ -421,22 +517,32 @@
       btn.textContent = cat;
       btn.onclick = () => {
         renderItems(section, items.filter(i => (i.group || 'Outros') === cat));
-
-        document.body.scrollTop = 0; // For Safari
-        document.documentElement.scrollTop = 0; 
+        document.querySelectorAll(`#cat-list-${section} .list-group-item`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       }
       catList.appendChild(btn);
 
-      if (!firstCat) firstCat = cat;
+      if (!firstCat) firstCat = btn;
     });
 
-    if (firstCat) renderItems(section, items.filter(i => (i.group || 'Outros') === firstCat));
+    if (firstCat) {
+      document.querySelectorAll(`#cat-list-${section} .list-group-item`).forEach(b => b.classList.remove('active'));
+      firstCat.classList.add('active');
+      renderItems(section, items.filter(i => (i.group || 'Outros') === firstCat.textContent));
+    } else if (favoritesBtn) {
+      // If there are no other categories, make sure favorites is active
+      document.querySelectorAll(`#cat-list-${section} .list-group-item`).forEach(b => b.classList.remove('active'));
+      favoritesBtn.classList.add('active');
+      favoritesBtn.onclick();
+    }
   }
 
-  function renderItems(section, list) {
+  function renderItems(section, list, isFavoritesView = false) {
     const grid = document.getElementById('items-' + section);
     grid.innerHTML = '';
-
+    
     if (section === 'series') {
       const seriesMap = {};
       list.forEach(it => {
@@ -448,10 +554,12 @@
       Object.keys(seriesMap).forEach(name => {
         const serieItems = seriesMap[name];
         const logo = serieItems[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
+        const isFav = isFavorite(section, serieItems[0].url);
         const col = document.createElement('div');
         col.className = 'col-6 col-md-3 col-lg-2';
         col.innerHTML = `
             <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+              <span class="favorite-icon" data-url="${section.url}" data-section="${section}">${isFav ? '★' : '☆'}</span>
               <div class="ratio ratio-16x9">
                 <img src="${logo}" class="card-img-top" alt="${name}">
               </div>
@@ -461,31 +569,82 @@
             </div>
           `;
         col.querySelector('.card').addEventListener('click', () => openSeriesModal(name, serieItems));
+        
+        // Add favorite icon listener
+        col.querySelector('.favorite-icon').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = e.target.dataset.url;
+          const section = e.target.dataset.section;
+          toggleFavorite(section, url, e.target);
+        });
+
         grid.appendChild(col);
       });
     } else if (section === 'tv') {
       const grouped = {};
-
-      list.forEach(it => {
+      const uniqueItems = list.filter((item, index, self) =>
+        index === self.findIndex((t) => (
+            t.baseName === item.baseName
+        ))
+      );
+      uniqueItems.forEach(it => {
         const base = it.baseName || getBaseChannelName(it.name);
         (grouped[base] ||= []).push(it);
       });
 
-      Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(base => {
-        const variants = grouped[base];
+      Object.keys(grouped).forEach(base => {
+        const variants = allItems.tv.filter(i => i.baseName === base);
         const primary = variants[0];
+        const isFav = isFavorite(section, primary.url);
         const col = document.createElement('div');
         col.className = 'col-6 col-md-3 col-lg-2';
-        col.innerHTML = `\n<div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">\n  <div class="ratio ratio-16x9">\n    <img src="${primary.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${base}">\n  </div>\n  <div class="card-body p-1 text-center">\n    <h6 class="card-title mb-0 text-truncate">${base}</h6>\n  </div>\n</div>`;
+        col.innerHTML = `
+          <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+            <span class="favorite-icon" data-url="${primary.url}" data-section="${section}">${isFav ? '★' : '☆'}</span>
+            <div class="ratio ratio-16x9">
+              <img src="${primary.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${base}">
+            </div>
+            <div class="card-body p-1 text-center">
+              <h6 class="card-title mb-0 text-truncate">${base}</h6>
+            </div>
+          </div>`;
         col.querySelector('.card').addEventListener('click',()=>playItem(primary, variants));
+        
+        // Add favorite icon listener
+        col.querySelector('.favorite-icon').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = e.target.dataset.url;
+          const section = e.target.dataset.section;
+          toggleFavorite(section, url, e.target);
+        });
+        
         grid.appendChild(col);
       });
     } else {
       list.forEach(it => {
+        const isFav = isFavorite(section, it.url);
         const col = document.createElement('div');
         col.className='col-6 col-md-3 col-lg-2';
-        col.innerHTML = `\n<div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">\n  <div class="ratio ratio-16x9">\n    <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${it.name}">\n  </div>\n  <div class="card-body p-1 text-center">\n    <h6 class="card-title mb-0 text-truncate">${it.name}</h6>\n  </div>\n</div>`;
+        col.innerHTML = `
+          <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+            <span class="favorite-icon" data-url="${it.url}" data-section="${section}">${isFav ? '★' : '☆'}</span>
+            <div class="ratio ratio-16x9">
+              <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top" alt="${it.name}">
+            </div>
+            <div class="card-body p-1 text-center">
+              <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
+            </div>
+          </div>`;
         col.querySelector('.card').addEventListener('click',()=>playItem(it));
+        
+        // Add favorite icon listener
+        col.querySelector('.favorite-icon').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = e.target.dataset.url;
+          const section = e.target.dataset.section;
+          toggleFavorite(section, url, e.target);
+        });
+        
         grid.appendChild(col);
       });
     }
@@ -532,7 +691,7 @@
         clear.addEventListener('click', () => {
           const inp = document.getElementById('search-' + section);
           if (inp) inp.value = '';
-          performSearch(section);
+          renderSection(sec, allItems[sec]);
         });
       }
     });
@@ -547,7 +706,7 @@
         const inp = document.getElementById('search-' + sec);
         if (inp) {
           inp.value = '';
-          performSearch(sec);
+          renderSection(sec, allItems[sec]); // Call renderSection to reset categories
         }
       });
     });
