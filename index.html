@@ -49,7 +49,7 @@
       font-size: 0.85rem;
       cursor: pointer;
     }
-    .search-wrapper .btn-clear-inside:hover { color: #fff }
+    .search-wrapper .btn-clear-inside:hover { color: #fff; }
     .search-wrapper .btn-search-inside {
       position: absolute;
       right: 4px;
@@ -61,18 +61,18 @@
       padding: 4px;
       cursor: pointer;
     }
-    .search-wrapper input { padding-right: 56px }
+    .search-wrapper input { padding-right: 56px; }
 
     @media(max-width: 768px) {
       .search-wrapper {
-        max-width: 120px
+        max-width: 120px;
       }
     }
 
-    #channel-alternatives { display: none; }
-    #channel-alternatives span.label { font-weight: 600; margin-right: .5rem; }
-    #channel-alternatives a { color: #8ecbff; text-decoration: none; margin-right: .75rem; font-size: .8rem; }
-    #channel-alternatives a:hover { text-decoration: underline; }
+    #channel-alternatives { display: inline; font-weight: 600; color: #898989; font-size: .8em; }
+    #channel-alternatives span.label { margin-right: .5rem; margin-left: 1em; font-style: italic; }
+    #channel-alternatives a { color: #c0c0c0; text-decoration: none; margin-right: 1.5em; }
+    #channel-alternatives a:hover { color: #6d9ac1; }
 
     .favorite-icon {
       position: absolute;
@@ -197,11 +197,13 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content bg-dark text-white">
         <div class="modal-header border-0">
-          <span class="modal-title" id="player-modal-title">Player</span>
+          <div class="mb-2">
+            <span class="modal-title" id="player-modal-title">Player</span>
+            <div id="channel-alternatives"></div>
+          </div>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div id="channel-alternatives" class="mb-2 small"></div>
           <div id="player"></div>
         </div>
       </div>
@@ -854,10 +856,9 @@
     const base = currentItem.baseName || getBaseChannelName(currentItem.name);
     const links = variants
       .filter(v => v !== currentItem)
-      .map(v => `<a href="#" data-name="${encodeURIComponent(v.name)}">${getVariantExtra(base, v.name)}</a>`)
+      .map(v => `<a href="#" data-name="${encodeURIComponent(v.name)}"><i class="bi bi-play-btn"></i> ${getVariantExtra(base, v.name)}</a>`)
       .join(' ');
-    altDiv.innerHTML = `<span class="label">Alternativas:</span>${links}`;
-    altDiv.style.display = 'block';
+    altDiv.innerHTML = `<span class="label">Alternativas: </span>${links}`;
     [...altDiv.querySelectorAll('a')].forEach(
       a => a.addEventListener('click', e => {
         e.preventDefault();
