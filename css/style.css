@@ -1,0 +1,89 @@
+body { background-color: #363636; color: #ffffff; }
+.nav-tabs { border-color: #aeaeae; }
+.nav-tabs .nav-link { color: #a7a7a7; margin-right: 10px; }
+.nav-tabs .nav-link.active { background-color: #313030; color: #b3b3b3; border-color: #aeaeae; }
+.card {
+  background: #363636;
+  transition: transform .2s;
+  border: 1px solid #aeaeae !important;
+  padding: 2px;
+  color: #e8e8e8;
+}
+.card:hover { transform: scale(1.09); background: #414141; }
+.card-title { font-size: 0.8rem; }
+.card-img-top { object-fit: cover; }
+
+#items-tv, #items-series, #items-movies { margin-top: 10px !important; }
+#items-movies .card .ratio, #items-series .card .ratio { height: 32vh !important; }
+.list-group-item { color: #cdcdcd; background-color: #535353; }
+
+.modal-header { padding-bottom: 5px; padding-top: 8px; }
+.modal-title { font-weight: 500; }
+.modal-body { padding-top: 0; margin-top: 0; }
+#player-modal, #series-modal { background: #000000d9; }
+
+.cat-with-search { display: flex; align-items: center; gap: 0.5rem; }
+.cat-with-search h6 { font-size: 0.85rem; margin: 0; white-space: nowrap; font-weight: 600; }
+.btn-search { background: #414141 !important; color: #d4d0d0; cursor: pointer; }
+.btn-clear { color: #c6c6c6; }
+
+.search-wrapper { position: relative; width: 100%; }
+.search-wrapper .btn-clear-inside {
+  position: absolute;
+  right: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #888888;
+  padding: 0 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.search-wrapper .btn-clear-inside:hover { color: #fff; }
+.search-wrapper .btn-search-inside {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #888888;
+  padding: 4px;
+  cursor: pointer;
+}
+.search-wrapper input { padding-right: 56px; }
+
+@media(max-width: 768px) {
+  .search-wrapper {
+    max-width: 120px;
+  }
+}
+
+#channel-alternatives { display: inline; font-weight: 600; color: #898989; font-size: .8em; }
+#channel-alternatives span.label { margin-right: .5rem; margin-left: 1em; font-style: italic; }
+#channel-alternatives a { color: #c0c0c0; text-decoration: none; margin-right: 1.5em; }
+#channel-alternatives a:hover { color: #6d9ac1; }
+
+.favorite-icon {
+  position: absolute;
+  top: -5px;
+  right: 10px;
+  font-size: 27px;
+  cursor: pointer;
+  text-shadow: 0 0 3px #000000;
+  z-index: 10;
+  color: #e1bb38;
+}
+
+.watched-icon {
+  position: absolute;
+  margin-top: 5px;
+  top: -5px;
+  left: 10px;
+  font-size: 22px;
+  cursor: pointer;
+  text-shadow: 0 0 3px #000000;
+  color: #ffffffc9;
+  z-index: 10;
+}
