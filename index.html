@@ -85,10 +85,22 @@
       z-index: 10;
       color: #e1bb38;
     }
+
+    .watched-icon {
+      position: absolute;
+      margin-top: 5px;
+      top: -5px;
+      left: 10px;
+      font-size: 22px;
+      cursor: pointer;
+      text-shadow: 0 0 3px #000000;
+      color: #ffffffc9;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
-  <div class="container-fluid py-3">
+<div class="container-fluid py-3">
   <div id="load-list-panel" class="input-group mb-3">
     <label for="urlInput" class="visually-hidden">M3U URL</label>
     <input type="text" id="urlInput" class="form-control" placeholder="Cole a URL do .m3u aqui">
@@ -130,7 +142,7 @@
             <h6 class="mb-0">Categorias</h6>
             <div class="input-group input-group-sm search-wrapper">
               <input id="search-tv" class="input-search form-control" type="text" placeholder="Pesquisar"
-                aria-label="Pesquisar canais">
+                     aria-label="Pesquisar canais">
               <span id="clear-tv" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
               <span id="search-btn-tv" class="btn-search input-group-text"><i class="bi bi-search"></i></span>
             </div>
@@ -146,9 +158,9 @@
         <div class="col-md-3">
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
-            <div class="input-group input-group-sm search-wrapper">            
+            <div class="input-group input-group-sm search-wrapper">
               <input id="search-movies" class="input-search form-control" type="text" placeholder="Pesquisar"
-                aria-label="Pesquisar filmes">
+                     aria-label="Pesquisar filmes">
               <span id="clear-movies" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
               <span id="search-btn-movies" class="btn-search input-group-text">
                 <i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar
@@ -166,9 +178,9 @@
         <div class="col-md-3">
           <div class="cat-with-search mb-2">
             <h6 class="mb-0">Categorias</h6>
-            <div class="input-group input-group-sm search-wrapper">             
+            <div class="input-group input-group-sm search-wrapper">
               <input id="search-series" class="input-search form-control" type="text" placeholder="Pesquisar"
-                aria-label="Pesquisar series">
+                     aria-label="Pesquisar series">
               <span id="clear-series" class="btn-clear input-group-text"><i class="bi bi-x"></i></span>
               <span id="search-btn-series" class="btn-search input-group-text">
                 <i class="bi bi-search"></i>&nbsp;&nbsp;Pesquisar
@@ -213,7 +225,8 @@
 
 </div>
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
 <script type="text/javascript">
   let allItems = { tv: [], movies: [], series: [] };
   var player = '';
@@ -303,7 +316,7 @@
       urlInput.disabled = false;
       btnLoadList.disabled = false;
       btnLoadList.textContent = 'Atualizar Lista';
-      
+
       toggleSettings();
     }
   }
@@ -312,7 +325,7 @@
   window.addEventListener('DOMContentLoaded', async () => {
     const urlInput = document.getElementById('urlInput');
     const lastUrl = localStorage.getItem('iptv_m3u_url');
-    
+
     toggleSettings();
 
     try {
@@ -336,11 +349,11 @@
 
     setupSearchListeners();
   });
-  
+
   function parseM3U(text) {
     allItems = { tv: [], movies: [], series: [] };
-    
-    let current = {};    
+
+    let current = {};
     const lines = text.split(/\r?\n/);
     for (const line of lines) {
       if (line.startsWith('#EXTINF')) {
@@ -373,7 +386,7 @@
     while(quality.test(base)) base = base.replace(quality, '').trim();
     return base;
   }
-  
+
   function getVariantExtra(baseName, fullName) {
     if (!fullName) return '';
     const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -408,27 +421,27 @@
 
     saveWatched(watched);
   }
-  
+
   function toggleSettings() {
     const loadListPanel = document.getElementById('load-list-panel');
     const btnLoadList = document.getElementById('load-list');
-    
+
     if (loadListPanel.classList.contains('d-none')) {
       loadListPanel.classList.remove('d-none');
     } else {
       loadListPanel.classList.add('d-none');
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     }
-    
+
     btnLoadList.focus();
   }
-  
+
   function renderAll() {
     renderSection('tv', allItems.tv);
     renderSection('movies', allItems.movies);
     renderSection('series', allItems.series);
   }
-  
+
   // --- Favorites logic start
   function getFavorites() {
     return JSON.parse(localStorage.getItem('favorites') || '{}');
@@ -443,9 +456,9 @@
     if (!favorites[section]) {
       favorites[section] = [];
     }
-    
+
     let isCurrentlyFavorite = false;
-    
+
     if (section === 'tv') {
       const item = allItems.tv.find(i => i.url === url);
       if (item) {
@@ -471,24 +484,24 @@
         favorites[section].push(url);
       }
     }
-    
+
     saveFavorites(favorites);
-    
+
     if (iconElement) {
-        const isNowFavorite = isFavorite(section, url);
-        iconElement.textContent = isNowFavorite ? '★' : '☆';
-        
-        const activeCatButton = document.querySelector(`#cat-list-${section} .list-group-item.active`);
-        if (activeCatButton && activeCatButton.textContent.includes('Favoritos') && !isNowFavorite) {
-          activeCatButton.click();
-        }
+      const isNowFavorite = isFavorite(section, url);
+      iconElement.textContent = isNowFavorite ? '★' : '☆';
+
+      const activeCatButton = document.querySelector(`#cat-list-${section} .list-group-item.active`);
+      if (activeCatButton && activeCatButton.textContent.includes('Favoritos') && !isNowFavorite) {
+        activeCatButton.click();
+      }
     }
   }
 
   function isFavorite(section, url) {
     const favorites = getFavorites();
     if (!favorites[section]) return false;
-    
+
     if (section === 'tv') {
       const item = allItems.tv.find(i => i.url === url);
       if (!item) return false;
@@ -509,7 +522,7 @@
 
     const grid = document.getElementById('items-' + section);
     grid.innerHTML = "";
-    
+
     // Add "Favorites" category at the top
     const favoritesBtn = document.createElement('button');
     favoritesBtn.className = 'list-group-item list-group-item-action';
@@ -542,7 +555,7 @@
 
       return a.localeCompare(b, 'pt-BR');
     });
-    
+
     let firstCat = null;
     catArray.forEach(cat => {
       const btn = document.createElement('button');
@@ -574,10 +587,34 @@
     }
   }
 
+  function getWatchedMovies() {
+    return JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+  }
+
+  function saveWatchedMovies(list) {
+    localStorage.setItem('watchedMovies', JSON.stringify(list));
+  }
+
+  function toggleWatchedMovieIcon(url, btn) {
+    let watched = getWatchedMovies();
+    const icon = btn.querySelector('i');
+
+    if (watched.includes(url)) {
+      watched = watched.filter(u => u !== url);
+      icon.classList.replace('bi-eye-slash', 'bi-eye');
+      btn.classList.replace('btn-success', 'btn-outline-light');
+    } else {
+      watched.push(url);
+      icon.classList.replace('bi-eye', 'bi-eye-slash');
+      btn.classList.replace('btn-outline-light', 'btn-success');
+    }
+    saveWatchedMovies(watched);
+  }
+
   function renderItems(section, list, isFavoritesView = false) {
     const grid = document.getElementById('items-' + section);
     grid.innerHTML = '';
-    
+
     if (section === 'series') {
       const seriesMap = {};
       list.forEach(it => {
@@ -606,7 +643,7 @@
             </div>
           `;
         col.querySelector('.card').addEventListener('click', () => openSeriesModal(name, serieItems));
-        
+
         // Add favorite icon listener
         col.querySelector('.favorite-icon').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -620,9 +657,9 @@
     } else if (section === 'tv') {
       const grouped = {};
       const uniqueItems = list.filter((item, index, self) =>
-        index === self.findIndex((t) => (
-          t.baseName === item.baseName
-        ))
+          index === self.findIndex((t) => (
+            t.baseName === item.baseName
+          ))
       );
       uniqueItems.forEach(it => {
         const base = it.baseName || getBaseChannelName(it.name);
@@ -649,7 +686,7 @@
             </div>
           </div>`;
         col.querySelector('.card').addEventListener('click',()=>playItem(primary, variants));
-        
+
         // Add favorite icon listener
         col.querySelector('.favorite-icon').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -657,16 +694,20 @@
           const section = e.target.dataset.section;
           toggleFavorite(section, url, e.target);
         });
-        
+
         grid.appendChild(col);
       });
-    } else {
+    } else if (section === 'movies') {
       list.forEach(it => {
         const isFav = isFavorite(section, it.url);
+        const isWatched = getWatchedMovies().includes(it.url);
         const col = document.createElement('div');
-        col.className='col-6 col-md-3 col-lg-2';
+        col.className = 'col-6 col-md-3 col-lg-2';
         col.innerHTML = `
-          <div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">
+          <div class="card h-100 border-0 shadow-sm" style="cursor:pointer; position:relative;">
+            <span class="watched-icon" data-url="${it.url}" title="Marcar como visto">
+              <i class="bi ${isWatched ? 'bi-eye-slash' : 'bi-eye'}"></i>
+            </span>
             <span class="favorite-icon" data-url="${it.url}" data-section="${section}">${isFav ? '★' : '☆'}</span>
             <div class="ratio ratio-16x9">
               <img src="${it.logo || 'https://via.placeholder.com/300x169?text=No+Image'}" class="card-img-top"
@@ -676,8 +717,8 @@
               <h6 class="card-title mb-0 text-truncate">${it.name}</h6>
             </div>
           </div>`;
-        col.querySelector('.card').addEventListener('click',()=>playItem(it));
-        
+        col.querySelector('.card').addEventListener('click', () => playItem(it, null));
+
         // Add favorite icon listener
         col.querySelector('.favorite-icon').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -685,7 +726,13 @@
           const section = e.target.dataset.section;
           toggleFavorite(section, url, e.target);
         });
-        
+
+        // Add watched icon listener
+        col.querySelector('.watched-icon').addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleWatchedMovieIcon(it.url, e.currentTarget);
+        });
+
         grid.appendChild(col);
       });
     }
@@ -700,7 +747,7 @@
       renderSection(section, allItems[section]);
       return;
     }
-    
+
     const filtered = (allItems[section] || []).filter(
       i => (i.name || '').toLowerCase().includes(q) || (i.baseName || '').toLowerCase().includes(q)
     );
@@ -730,7 +777,7 @@
       if (btn) {
         btn.addEventListener('click', () => performSearch(section));
       }
-      
+
       if (clear) {
         clear.addEventListener('click', () => {
           const inp = document.getElementById('search-' + section);
@@ -745,7 +792,7 @@
       tab.addEventListener('shown.bs.tab', (e) => {
         const target = e.target.getAttribute('data-bs-target');
         if (!target) return;
-        
+
         const sec = target.replace('#tab-','');
         const inp = document.getElementById('search-' + sec);
         if (inp) {
