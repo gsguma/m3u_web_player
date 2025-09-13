@@ -54,10 +54,22 @@ body { background-color: #363636; color: #ffffff; }
 }
 .search-wrapper input { padding-right: 56px; }
 
-@media(max-width: 768px) {
-  .search-wrapper {
-    max-width: 120px;
+@media (max-width: 768px) {
+  .cat-with-search { flex-direction: column; align-items: stretch; gap: 0.4rem; }
+  .cat-with-search h6 { white-space: normal; }
+  .search-wrapper { width: 100%; max-width: 100%; }
+  #items-movies .card .ratio, #items-series .card .ratio, #items-tv .card .ratio {
+    height: 80vh !important;
   }
+  .cat-with-search h6, .cat-with-search > * > .btn-search { display: none; }
+}
+
+@media (max-width: 576px) {
+  #items-movies .card .ratio, #items-series .card .ratio, #items-tv .card .ratio {
+    height: 50vh !important;
+  }
+  .card-title { font-size: 0.75rem; }
+  .cat-with-search h6, .cat-with-search > * > .btn-search { display: none; }
 }
 
 #channel-alternatives { display: inline; font-weight: 600; color: #898989; font-size: .8em; }
