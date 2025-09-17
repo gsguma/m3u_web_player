@@ -509,7 +509,7 @@ function playVariant(item, modal, type) {
   playerDiv.innerHTML = '';
   let url = item.url;
   if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
-    url = url.replace(/^https?:\/\/[^/]+/, 'http://bmtop.online').replace(/\.ts$/, '.m3u8');
+    url = url.replace(/^https?:\/\/[^/]+/, 'http://deylernew.xyz').replace(/\.ts$/, '.m3u8');
   }
   const title = item.baseName || getBaseChannelName(item.name) || item.name;
   try {
