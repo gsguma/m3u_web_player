@@ -148,7 +148,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Register tab listeners here
   const tabLinks = document.querySelectorAll('#tabs .nav-link[data-bs-toggle="tab"]');
   tabLinks.forEach(tab => {
-    tab.addEventListener('shown.bs.tab', function(e) {
+    tab.addEventListener('shown.bs.tab', function (e) {
       const tabId = e.target.getAttribute('data-bs-target');
       if (tabId) saveLastTab(tabId);
     });
@@ -161,7 +161,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 // Listen for tab changes and save the last active tab
 const tabLinks = document.querySelectorAll('#tabs .nav-link[data-bs-toggle="tab"]');
 tabLinks.forEach(tab => {
-  tab.addEventListener('shown.bs.tab', function(e) {
+  tab.addEventListener('shown.bs.tab', function (e) {
     const tabId = e.target.getAttribute('data-bs-target');
     if (tabId) saveLastTab(tabId);
   });
@@ -177,15 +177,17 @@ function parseM3U(text) {
       const name = line.split(',').pop().trim();
       const tvgLogo = /tvg-logo="(.*?)"/.exec(line);
       const group = /group-title="(.*?)"/.exec(line);
-      current = { name, logo: tvgLogo ? tvgLogo[1] : '', group: group ? group[1] : 'Outros' };
+      const xuiId = /xui-id="(.*?)"/.exec(line);
+      current = { name, logo: tvgLogo ? tvgLogo[1] : '', group: group ? group[1] : 'Outros', xuiId: xuiId ? xuiId[1] : '' };
     } else if (line && !line.startsWith('#')) {
       current.url = line.trim();
-      if (/series/i.test(current.url)) {
+      if (current.name && /S\d+E\d+/i.test(current.name)) {
         allItems.series.push(current);
-      } else if (/movie/i.test(current.url)) {
+      } else if (current.name && /\(\d{4}\)/.test(current.name) && !/S\d+E\d+/i.test(current.name)) {
         allItems.movies.push(current);
-      } else if (/.ts/i.test(current.url) || /.m3u8/i.test(current.url)) {
-        current.baseName = getBaseChannelName(current.name); allItems.tv.push(current);
+      } else if (/\.ts/i.test(current.url) || /\.m3u8/i.test(current.url) || /\/ts(\s|$)/i.test(current.url)) {
+        current.baseName = getBaseChannelName(current.name);
+        allItems.tv.push(current);
       }
 
       current = {};
@@ -200,14 +202,14 @@ function getBaseChannelName(name) {
   base = base.replace(/\s*\[ALT\]$/i, '').trim();
 
   const quality = /(\s+(FHD|FULL ?HD|UHD|4K|HD|SD|1080P|720P))$/i;
-  while(quality.test(base)) base = base.replace(quality, '').trim();
+  while (quality.test(base)) base = base.replace(quality, '').trim();
   return base;
 }
 
 function getVariantExtra(baseName, fullName) {
   if (!fullName) return '';
   const safeBase = baseName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-  let rest = fullName.replace(new RegExp('^'+safeBase, 'i'), '').trim();
+  let rest = fullName.replace(new RegExp('^' + safeBase, 'i'), '').trim();
   if (!rest) rest = 'Principal';
   return rest;
 }
@@ -479,13 +481,13 @@ function openPlayerModal({ title, variants, activeUrl, type }) {
   if (uniqueVariants.length > 1) {
     let html = '<span class="label">Alternatives: </span>';
     html += uniqueVariants.map((m, idx) => `
-      <a href="#" data-idx="${idx}" class="me-3" style="${m.url===activeUrl?'font-weight:bold;text-decoration:underline;':''}">
+      <a href="#" data-idx="${idx}" class="me-3" style="${m.url === activeUrl ? 'font-weight:bold;text-decoration:underline;' : ''}">
         <i class="bi bi-play-btn"></i> ${getVariantLabel(type, m.name)}
       </a>`
     ).join(' ');
     altDiv.innerHTML = html;
     altDiv.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', function(e) {
+      a.addEventListener('click', function (e) {
         e.preventDefault();
         const idx = parseInt(a.getAttribute('data-idx'));
         playVariant(uniqueVariants[idx], modal, type);
@@ -507,14 +509,21 @@ function openPlayerModal({ title, variants, activeUrl, type }) {
 function playVariant(item, modal, type) {
   const playerDiv = document.getElementById('player');
   playerDiv.innerHTML = '';
-  let url = item.url;
-  if (url.match(/\.ts(\?.*)?$/i) || url.match(/\.mp4(\?.*)?$/i)) {
-    url = url.replace(/^https?:\/\/[^/]+/, 'http://g2026.sbs').replace(/\.ts$/, '.m3u8');
+  let urlToPlay = item.url; // Use a nova variável para a URL a ser usada no player
+
+  if (type === 'tv') {
+    const { username, password } = getM3UUrlParams();
+    if (username && password && item.xuiId) {
+      urlToPlay = `https://cdnplaynewcast.fun/live/${username}/${password}/${item.xuiId}.m3u8`;
+    } else {
+      console.warn("Missing username, password, or xuiId for TV channel. Falling back to original URL.", { username, password, xuiId: item.xuiId });
+    }
   }
+
   const title = item.baseName || getBaseChannelName(item.name) || item.name;
   try {
-    player = new Playerjs({ id: playerDiv.id || 'player', file: url, title });
-  } catch(e) {
+    player = new Playerjs({ id: playerDiv.id || 'player', file: urlToPlay, title }); // Usar urlToPlay
+  } catch (e) {
     console.error(e);
   }
 }
@@ -649,7 +658,7 @@ function performSearch(section) {
     }
     // For TV and movies, search by name and group
     return (item.name && item.name.toLowerCase().includes(query)) ||
-           (item.group && item.group.toLowerCase().includes(query));
+      (item.group && item.group.toLowerCase().includes(query));
   });
   renderSection(section, filtered);
 }
@@ -688,7 +697,7 @@ function setupSearchListeners() {
     tab.addEventListener('shown.bs.tab', (e) => {
       const target = e.target.getAttribute('data-bs-target');
       if (!target) return;
-      const sec = target.replace('#tab-','');
+      const sec = target.replace('#tab-', '');
       const inp = document.getElementById('search-' + sec);
       if (inp) {
         inp.value = '';
@@ -733,7 +742,7 @@ function renderItems(section, list, isFavoritesView = false) {
       if (!seriesMap[baseName]) seriesMap[baseName] = [];
       seriesMap[baseName].push(item);
     });
-    Object.keys(seriesMap).forEach(function(name) {
+    Object.keys(seriesMap).forEach(function (name) {
       const episodes = seriesMap[name];
       const logo = episodes[0].logo || 'https://via.placeholder.com/300x169?text=Serie';
       const favUrls = (getFavorites().series || []);
@@ -743,20 +752,20 @@ function renderItems(section, list, isFavoritesView = false) {
       // Card HTML
       col.innerHTML =
         '<div class="card h-100 border-0 shadow-sm" style="cursor:pointer;">' +
-          '<span class="favorite-icon" data-url="' + episodes[0].url + '" data-section="' + section + '">' +
-            (isFav ? '★' : '☆') +
-          '</span>' +
-          '<div class="ratio ratio-16x9">' +
-            '<img src="' + logo + '" class="card-img-top" alt="' + name + '">' +
-          '</div>' +
-          '<div class="card-body p-1 text-center">' +
-            '<h6 class="card-title mb-0 text-truncate">' + name + '</h6>' +
-          '</div>' +
+        '<span class="favorite-icon" data-url="' + episodes[0].url + '" data-section="' + section + '">' +
+        (isFav ? '★' : '☆') +
+        '</span>' +
+        '<div class="ratio ratio-16x9">' +
+        '<img src="' + logo + '" class="card-img-top" alt="' + name + '">' +
+        '</div>' +
+        '<div class="card-body p-1 text-center">' +
+        '<h6 class="card-title mb-0 text-truncate">' + name + '</h6>' +
+        '</div>' +
         '</div>';
       // Card click opens modal with all episodes
-      col.querySelector('.card').addEventListener('click', function() { openSeriesModal(name, episodes); });
+      col.querySelector('.card').addEventListener('click', function () { openSeriesModal(name, episodes); });
       // Favorite icon click toggles favorite
-      col.querySelector('.favorite-icon').addEventListener('click', function(e) {
+      col.querySelector('.favorite-icon').addEventListener('click', function (e) {
         e.stopPropagation();
         const url = e.target.dataset.url;
         const section = e.target.dataset.section;
@@ -793,7 +802,7 @@ function renderItems(section, list, isFavoritesView = false) {
           </div>
         </div>`;
       // Clique chama openPlayerModal
-      col.querySelector('.card').addEventListener('click',()=>openPlayerModal({
+      col.querySelector('.card').addEventListener('click', () => openPlayerModal({
         title: base,
         variants,
         activeUrl: primary.url,
@@ -844,7 +853,7 @@ function renderItems(section, list, isFavoritesView = false) {
         </div>
       </div>`;
     // Clique chama openPlayerModal
-    col.querySelector('.card').addEventListener('click', function() {
+    col.querySelector('.card').addEventListener('click', function () {
       const baseName = getBaseMovieName(item.name);
       const variants = allItems.movies.filter(m => getBaseMovieName(m.name) === baseName);
       openPlayerModal({
@@ -855,14 +864,14 @@ function renderItems(section, list, isFavoritesView = false) {
       });
     });
     // ...favoritos...
-    col.querySelector('.favorite-icon').addEventListener('click', function(e) {
+    col.querySelector('.favorite-icon').addEventListener('click', function (e) {
       e.stopPropagation();
       const url = e.target.dataset.url;
       const section = e.target.dataset.section;
       toggleFavorite(section, url, e.target);
     });
     // ...visto...
-    col.querySelector('.watched-icon').addEventListener('click', function(e) {
+    col.querySelector('.watched-icon').addEventListener('click', function (e) {
       e.stopPropagation();
       toggleWatchedMovieIcon(item.url, e.currentTarget);
     });
@@ -881,4 +890,19 @@ function getBaseMovieName(name) {
   // Remove parênteses e colchetes vazios
   base = base.replace(/[\[\]()]/g, '').trim();
   return base;
+}
+
+function getM3UUrlParams() {
+  const m3uUrl = localStorage.getItem('iptv_m3u_url');
+  if (!m3uUrl) return { username: null, password: null };
+
+  try {
+    const url = new URL(m3uUrl);
+    const username = url.searchParams.get('username');
+    const password = url.searchParams.get('password');
+    return { username, password };
+  } catch (e) {
+    console.error("Error parsing M3U URL from localStorage:", e);
+    return { username: null, password: null };
+  }
 }
